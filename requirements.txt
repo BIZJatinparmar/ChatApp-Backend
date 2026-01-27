@@ -1,0 +1,6 @@
+fastapi[standard]
+SQLAlchemy
+langchain
+langchain-openai
+python-dotenv
+argon2-cffi
