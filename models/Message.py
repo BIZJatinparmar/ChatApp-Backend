@@ -23,24 +23,28 @@ if TYPE_CHECKING:
 class Message(Base):
     __tablename__ = "messages"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=uuid_str)
 
     conversation_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("conversations.id", ondelete="CASCADE"), index=True
     )
 
-    role: Mapped[str] = mapped_column(String(20), index=True)  # user/assistant/system/tool
+    role: Mapped[str] = mapped_column(
+        String(20), index=True)  # user/assistant/system/tool
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
-    payload_json: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
-
+    payload_json: Mapped[dict] = mapped_column(
+        JSON, default=dict, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
 
-    conversation: Mapped["Conversation"] = relationship(back_populates="messages")
+    conversation: Mapped["Conversation"] = relationship(
+        back_populates="messages")
 
     __table_args__ = (
-        Index("ix_messages_conversation_created", "conversation_id", "created_at"),
+        Index("ix_messages_conversation_created",
+              "conversation_id", "created_at"),
     )

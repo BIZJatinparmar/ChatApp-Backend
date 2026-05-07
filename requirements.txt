@@ -3,8 +3,10 @@ SQLAlchemy
 langchain
 langchain-openai
 langchain-community
+langchain-azure-ai
 faiss-cpu
 pypdf
 python-dotenv
 argon2-cffi
 python-multipart
+azure-identity

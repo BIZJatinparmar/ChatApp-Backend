@@ -1,13 +1,16 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
 
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
 # Distribution / packaging
-.Python
 build/
 develop-eggs/
 dist/
@@ -20,12 +23,8 @@ parts/
 sdist/
 var/
 wheels/
-pip-wheel-metadata/
-share/python-wheels/
 *.egg-info/
-.installed.cfg
 *.egg
-MANIFEST
 
 # PyInstaller
 *.manifest
@@ -35,7 +34,7 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Unit test / coverage reports
+# Unit test / coverage
 htmlcov/
 .tox/
 .nox/
@@ -53,82 +52,64 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+# Environments
+.env
+.env.*
+!.env.example
 
-# Flask stuff:
-instance/
-.webassets-cache
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
 
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
 
 # Jupyter Notebook
 .ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# PEP 582
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
 
 # mypy
 .mypy_cache/
 .dmypy.json
 dmypy.json
 
-# Pyre type checker
+# Pyre
 .pyre/
 
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# Ruff
+.ruff_cache/
 
-# OS
-.DS_Store
-Thumbs.db
+# uv / pdm
+uv.lock
+pdm.lock
+__pypackages__/
+
+# FastAPI specific
+# Static files generated at runtime
+static/
+
+# Alembic (if using database migrations)
+# Uncomment if you want to ignore auto-generated versions:
+# alembic/versions/
+
+# Logs
+*.log
+logs/
+
+# Docker
+docker-compose.override.yml
+
+# Secrets
+*.pem
+*.key
+credentials.json
+service-account.json
+
+app.db
