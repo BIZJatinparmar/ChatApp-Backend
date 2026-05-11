@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 import models
-from models.Conversation import Conversation
-from models.User import User
+from models.conversation import Conversation
+from models.user import User
 from schemas.models import ModelList, Role
-from models.Message import Message
+from models.message import Message
 from schemas.models import StreamMessageRequest
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document

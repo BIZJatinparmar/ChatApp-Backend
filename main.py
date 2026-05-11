@@ -1,10 +1,10 @@
 from db import get_db, SQL_ENGINE
 from sqlalchemy.orm import Session
 from fastapi import FastAPI, Depends, Request
-from models.Base import Base
-from models.User import User
-from models.Message import Message
-from models.Conversation import Conversation
+from models.base import Base
+from models.user import User
+from models.message import Message
+from models.conversation import Conversation
 from fastapi.middleware.cors import CORSMiddleware
 from schemas.models import MessageCreateRequest
 from routers import auth, users, file, chat

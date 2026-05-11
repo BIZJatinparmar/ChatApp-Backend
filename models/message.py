@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-from .Base import Base, uuid_str
+from .base import Base, uuid_str
 
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -16,8 +16,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-if TYPE_CHECKING:
-    from .Conversation import Conversation
+from .conversation import Conversation
 
 
 class Message(Base):

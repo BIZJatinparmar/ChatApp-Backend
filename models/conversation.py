@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .Base import Base, uuid_str
+from .base import Base, uuid_str
 from datetime import datetime
 from typing import Optional, TYPE_CHECKING
 from sqlalchemy import (
@@ -14,22 +14,26 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-if TYPE_CHECKING:    
-    from .User import User
-    from .Message import Message
+if TYPE_CHECKING:
+    from .user import User
+    from .message import Message
+
 
 class Conversation(Base):
     __tablename__ = "conversations"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=uuid_str)
     owner_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("users.id", ondelete="CASCADE"), index=True
     )
 
     title: Mapped[Optional[str]] = mapped_column(String(200))
-    is_archived: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_archived: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False)
 
-    metadata_json: Mapped[dict[str,str]] = mapped_column(JSON, default=dict, nullable=False)
+    metadata_json: Mapped[dict[str, str]] = mapped_column(
+        JSON, default=dict, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

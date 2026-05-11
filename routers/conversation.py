@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from db import get_db
-from models.Conversation import Conversation
+from models.conversation import Conversation
 from pydantic import BaseModel
 
 
