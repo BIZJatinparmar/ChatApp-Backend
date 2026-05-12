@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Response,Cookie
+from fastapi import APIRouter, Depends, HTTPException, Response, Cookie
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 from typing import Annotated
+from models.session import Session
+from models.user import User
 from security.sessions import SESSION_COOKIE_NAME
 from db import get_db
-from models.Session import Session
-from models.User import User
 from schemas.auth import LoginIn, SignupIn
 from schemas.user import UserOut
 from security.passwords import hash_password, verify_password
@@ -25,7 +25,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def signup(payload: SignupIn, db: DbSession = Depends(get_db)):
     email = payload.email.lower().strip()
     if len(payload.password) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
+        raise HTTPException(
+            status_code=400, detail="Password must be at least 8 characters")
 
     existing = db.scalar(select(User).where(User.email == email))
     if existing:
@@ -45,7 +46,8 @@ def login(payload: LoginIn, response: Response, db: DbSession = Depends(get_db))
     user = db.scalar(select(User).where(User.email == email))
 
     if not user or not verify_password(payload.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        raise HTTPException(
+            status_code=401, detail="Invalid email or password")
 
     session_id = new_session_id()
     sess = Session(id=session_id, user_id=user.id, expires_at=compute_expiry())
@@ -57,19 +59,18 @@ def login(payload: LoginIn, response: Response, db: DbSession = Depends(get_db))
     return {"ok": True}
 
 
-
-
 @router.post("/logout")
 def logout(
-	    response: Response,
-	    db: DbSession = Depends(get_db),
-	    session_id: Annotated[str | None, Cookie(alias=SESSION_COOKIE_NAME)] = None,
-	):
-        if session_id:
-             sess = db.get(Session, session_id)
-             if sess:
-                db.delete(sess) 
-                db.commit()
+    response: Response,
+    db: DbSession = Depends(get_db),
+    session_id: Annotated[str | None, Cookie(
+        alias=SESSION_COOKIE_NAME)] = None,
+):
+    if session_id:
+        sess = db.get(Session, session_id)
+        if sess:
+            db.delete(sess)
+            db.commit()
 
-        clear_session_cookie(response)
-        return {"ok": True}
+    clear_session_cookie(response)
+    return {"ok": True}
