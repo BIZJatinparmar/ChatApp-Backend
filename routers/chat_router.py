@@ -2,6 +2,8 @@ from fastapi import Depends
 from fastapi import APIRouter
 from db import get_db
 from sqlalchemy.orm import Session
+from deps.auth import get_current_user
+from models.user import User
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from schemas.models import StreamMessageRequest
@@ -32,11 +34,12 @@ async def get_docs(payload: StreamMessageRequest):
 async def chat_stream(
     payload: StreamMessageRequest,
     db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
     chat_stream_service = ChatStreamService(db)
 
     return StreamingResponse(
-        chat_stream_service.stream_messages(payload),
+        chat_stream_service.stream_messages(payload, user),
         media_type="application/x-ndjson",
         headers={
             "Cache-Control": "no-cache",

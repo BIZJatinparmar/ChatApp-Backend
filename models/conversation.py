@@ -8,6 +8,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Index,
+    Integer,
     JSON,
     String,
     func,
@@ -34,6 +35,12 @@ class Conversation(Base):
 
     metadata_json: Mapped[dict[str, str]] = mapped_column(
         JSON, default=dict, nullable=False)
+    input_tokens: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False, server_default="0")
+    output_tokens: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False, server_default="0")
+    total_tokens: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False, server_default="0")
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

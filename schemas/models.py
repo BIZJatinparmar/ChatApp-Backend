@@ -20,6 +20,10 @@ class MessageCreateRequest(BaseModel):
     content: str
 
 
+class ConversationCreateRequest(BaseModel):
+    id: str | None = None
+
+
 class StreamMessageRequest(BaseModel):
     message_id: str
     user_content: str
