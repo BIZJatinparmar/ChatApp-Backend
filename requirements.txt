@@ -7,6 +7,6 @@ langchain-azure-ai
 faiss-cpu
 pypdf
 python-dotenv
-argon2-cffi
 python-multipart
 azure-identity
+PyJWT[crypto]

@@ -1,11 +1,13 @@
 
 import secrets
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from sqlalchemy.orm import Session
 from db import get_db
+from deps.auth import require_permissions
 from models.conversation import Conversation
+from models.user import User
 from pydantic import BaseModel
 from respositories.conversation_repository import ConversationRepository
 from schemas.models import ConversationCreateRequest
@@ -32,11 +34,12 @@ router = APIRouter(prefix="/conversation", tags=["conversation"])
 
 @router.get("/")
 def conversations(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permissions("conversation:read")),
 ):
     conversation_repository = ConversationRepository(
         db)
-    conversation_data = conversation_repository.get_all_conversations()
+    conversation_data = conversation_repository.get_all_conversations(user.id)
     transformed = [{"id": data.id, "title": data.title, "ownerId": data.owner_id,
                     "createdAt": data.created_at, "updatedAt": data.updated_at, "inputTokens": data.input_tokens, "outputTokens": data.output_tokens, "totalTokens": data.total_tokens} for data in conversation_data]
 
@@ -46,8 +49,18 @@ def conversations(
 
 
 @router.get("/{conversation_id}/messages")
-def get_conversation_messages(conversation_id: str, db: Session = Depends(get_db)):
+def get_conversation_messages(
+    conversation_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permissions("conversation:read")),
+):
     conversation_repository = ConversationRepository(db)
+    conversation = conversation_repository.get_by_id(conversation_id)
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    if conversation.owner_id != user.id:
+        raise HTTPException(status_code=403, detail="Conversation is not owned by user")
+
     message_data = conversation_repository.get_conversation_messages(
         conversation_id)
     transformed = [{"id": data.id, "content": data.content, "role": data.role,
@@ -60,11 +73,11 @@ def get_conversation_messages(conversation_id: str, db: Session = Depends(get_db
 @router.post("/")
 async def create_conversation(
     body: ConversationCreateRequest,
-    # user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: User = Depends(require_permissions("conversation:write")),
 ):
     conversation_repository = ConversationRepository(db)
     conversation_id = body.id or generate_nano_id()
-    convo = Conversation(id=conversation_id, owner_id="1", title="NewChat")
+    convo = Conversation(id=conversation_id, owner_id=user.id, title="NewChat")
     conversation_repository.create_conversation(convo)
     return convo

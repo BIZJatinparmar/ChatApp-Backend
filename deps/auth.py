@@ -11,6 +11,17 @@ from models.session import Session
 from models.user import User
 from security.sessions import SESSION_COOKIE_NAME
 
+ROLE_PERMISSIONS: dict[str, set[str]] = {
+    "admin": {"*"},
+    "user": {
+        "chat:use",
+        "conversation:read",
+        "conversation:write",
+        "message:write",
+        "files:upload",
+    },
+}
+
 
 def get_current_user(
     db: DbSession = Depends(get_db),
@@ -42,5 +53,46 @@ def get_current_user(
         db.commit()
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid session")
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="User is inactive")
 
     return user
+
+
+def get_effective_permissions(user: User) -> set[str]:
+    role_permissions = ROLE_PERMISSIONS.get(user.role, set())
+    if "*" in role_permissions:
+        return {"*"}
+    explicit_permissions = {
+        permission.permission_code for permission in user.permissions
+    }
+    return role_permissions | explicit_permissions
+
+
+def require_role(required_role: str):
+    def dependency(user: User = Depends(get_current_user)) -> User:
+        if user.role != required_role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Requires role: {required_role}",
+            )
+        return user
+
+    return dependency
+
+
+def require_permissions(*required_permissions: str):
+    def dependency(user: User = Depends(get_current_user)) -> User:
+        effective_permissions = get_effective_permissions(user)
+        if "*" in effective_permissions:
+            return user
+        missing = [p for p in required_permissions if p not in effective_permissions]
+        if missing:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Missing permissions: {', '.join(missing)}",
+            )
+        return user
+
+    return dependency

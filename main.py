@@ -1,21 +1,23 @@
-from db import get_db, SQL_ENGINE
-from sqlalchemy.orm import Session
-from fastapi import FastAPI, Depends, Request
-from models.base import Base
-from models.user import User
-from models.message import Message
-from models.conversation import Conversation
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from schemas.models import MessageCreateRequest
-from routers import auth, chat_router, conversation_router, message_router, users, file
-from routers.users import get_current_user
 
+from db import SQL_ENGINE
+from db_bootstrap import bootstrap_auth_schema
+from models.base import Base
+from routers import auth, budget_requests, chat_router, conversation_router, message_router, users, file
+from routers.admin_usage import router as admin_usage_router
+from routers.admin_users import router as admin_users_router
+
+bootstrap_auth_schema(SQL_ENGINE)
 Base.metadata.create_all(bind=SQL_ENGINE)
 
 
 app = FastAPI()
 
 app.include_router(auth.router)
+app.include_router(budget_requests.router)
+app.include_router(admin_usage_router)
+app.include_router(admin_users_router)
 app.include_router(users.router)
 app.include_router(file.router)
 app.include_router(chat_router.router)

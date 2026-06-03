@@ -1,11 +1,9 @@
 import json
 import os
 import httpx
-from langchain.messages import AIMessage, HumanMessage, SystemMessage
+from langchain.messages import AIMessage, HumanMessage, UsageMetadata
 from models.user import User
 from langchain_azure_ai.chat_models import AzureAIOpenAIApiChatModel
-from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
 from sqlalchemy.orm import Session
 from models.message import Message
 from respositories.conversation_repository import ConversationRepository
@@ -15,6 +13,7 @@ from schemas.models import ModelList, Role, StreamMessageRequest
 from langchain_core.documents import Document
 from services.rag_service import RagService
 from dotenv import load_dotenv
+import tiktoken
 
 load_dotenv()
 
@@ -64,13 +63,19 @@ class ChatStreamService:
             model.value) for model in ModelList}
 
     @staticmethod
-    def _parse_usage(usage: dict | None) -> tuple[int, int, int]:
+    def _parse_usage(usage: UsageMetadata | None) -> tuple[int, int, int]:
         if not usage:
             return 0, 0, 0
         input_tokens = int(usage.get("input_tokens", 0) or 0)
         output_tokens = int(usage.get("output_tokens", 0) or 0)
         total_tokens = int(usage.get("total_tokens", 0) or 0)
         return input_tokens, output_tokens, total_tokens
+
+    @staticmethod
+    def _estimate_token_count(content: str) -> int:
+        encoding = tiktoken.encoding_for_model(model_name="gpt-5")
+        output_tokens = encoding.encode(content)
+        return len(output_tokens)
 
     async def stream_messages(self, payload: StreamMessageRequest, user: User):
         system_message = self.rag_service.build_system_message(
@@ -102,7 +107,7 @@ class ChatStreamService:
             payload.conversation_id)
         if (len(existing_messages) == 1):
             self.conversation_repository.update_conversation_title(
-                payload.conversation_id,  user_message.content[:10])
+                payload.conversation_id,  user_message.content[:10], user.id)
 
         langchain_messages = [
             HumanMessage(message.content)
@@ -113,16 +118,35 @@ class ChatStreamService:
 
         langchain_messages = [system_message] + langchain_messages
 
-        assistant_input_tokens = 0
-        assistant_output_tokens = 0
-        assistant_total_tokens = 0
+        langchain_content = "".join(
+            [message.content for message in langchain_messages if isinstance(message.content, str)])
+
+        total_assistant_input_tokens = 0
+        total_assistant_output_tokens = 0
+        total_assistant_total_tokens = 0
 
         try:
             async for chunk in model.astream(langchain_messages):
-                usage = getattr(chunk, "usage_metadata", None)
+                usage = chunk.usage_metadata if hasattr(
+                    chunk, "usage_metadata") else None
+
                 if usage:
                     assistant_input_tokens, assistant_output_tokens, assistant_total_tokens = self._parse_usage(
                         usage)
+                    total_assistant_input_tokens = assistant_input_tokens
+                    total_assistant_output_tokens += assistant_output_tokens
+                    total_assistant_total_tokens += assistant_total_tokens
+                else:
+                    assistant_output_tokens = self._estimate_token_count(getattr(
+                        chunk,
+                        "text",
+                        "",
+                    ))
+                    total_assistant_input_tokens = self._estimate_token_count(
+                        langchain_content)
+                    total_assistant_output_tokens += assistant_output_tokens
+                    total_assistant_total_tokens = total_assistant_output_tokens + \
+                        total_assistant_input_tokens
 
                 content = getattr(
                     chunk,
@@ -149,23 +173,23 @@ class ChatStreamService:
                 role=Role.assistant,
                 conversation_id=payload.conversation_id,
                 model_id=payload.model_id.value,
-                input_tokens=assistant_input_tokens,
-                output_tokens=assistant_output_tokens,
-                total_tokens=assistant_total_tokens,
+                input_tokens=total_assistant_input_tokens,
+                output_tokens=total_assistant_output_tokens,
+                total_tokens=total_assistant_total_tokens,
             )
 
             self.message_repository.create_message(assistant_message)
             self.conversation_repository.increment_usage(
                 payload.conversation_id,
-                user_input_tokens + assistant_input_tokens,
-                assistant_output_tokens,
-                user_input_tokens + assistant_total_tokens,
+                user_input_tokens + total_assistant_input_tokens,
+                total_assistant_output_tokens,
+                user_input_tokens + total_assistant_total_tokens,
             )
             self.user_repository.increment_usage(
                 user.id,
-                user_input_tokens + assistant_input_tokens,
-                assistant_output_tokens,
-                user_input_tokens + assistant_total_tokens,
+                user_input_tokens + total_assistant_input_tokens,
+                total_assistant_output_tokens,
+                user_input_tokens + total_assistant_total_tokens,
             )
             self.db.commit()
 

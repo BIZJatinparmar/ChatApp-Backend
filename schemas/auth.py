@@ -1,11 +1,5 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
-class SignupIn(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class LoginIn(BaseModel):
-    email: EmailStr
-    password: str
+class MicrosoftLoginIn(BaseModel):
+    id_token: str

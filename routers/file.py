@@ -5,6 +5,10 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
+from fastapi import Depends
+
+from deps.auth import require_permissions
+from models.user import User
 
 router = APIRouter(prefix="/files", tags=["files"])
 
@@ -38,7 +42,10 @@ def build_faiss_index(pdf_path: str, index_dir: str) -> None:
 
 
 @router.post("/upload")
-async def upload_file(file: UploadFile = File(...))-> dict[str, str|int|None]:
+async def upload_file(
+    file: UploadFile = File(...),
+    _: User = Depends(require_permissions("files:upload")),
+) -> dict[str, str | int | None]:
     content = await file.read()
     doc_id = str(uuid4())
     path = os.path.join(os.getcwd(), "../uploaded_files", f"{doc_id}_{file.filename}")
