@@ -1,6 +1,6 @@
-from db import SQL_ENGINE
+from app.core.database import SQL_ENGINE
 
-from models.Base import Base
+from app.models.base import Base
 
 def main() -> None:
     Base.metadata.create_all(bind=SQL_ENGINE)

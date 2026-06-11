@@ -1,14 +1,9 @@
-from fastapi import APIRouter, Depends
-
-from deps.auth import get_current_user, get_effective_permissions
-from models.user import User
-from schemas.user import AppRole, UserOut
-
-router = APIRouter(tags=["users"])
+from app.dependencies.auth import get_effective_permissions
+from app.models.user import User
+from app.schemas.user import AppRole, UserOut
 
 
-@router.get("/me", response_model=UserOut)
-def me(user: User = Depends(get_current_user)):
+def to_user_out(user: User) -> UserOut:
     return UserOut(
         id=user.id,
         email=user.email,
@@ -23,3 +18,8 @@ def me(user: User = Depends(get_current_user)):
         total_tokens=user.total_tokens,
         token_budget=user.token_budget,
     )
+
+
+class UserService:
+    def get_current_user_profile(self, user: User) -> UserOut:
+        return to_user_out(user)

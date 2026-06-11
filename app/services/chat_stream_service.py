@@ -2,16 +2,16 @@ import json
 import os
 import httpx
 from langchain.messages import AIMessage, HumanMessage, UsageMetadata
-from models.user import User
+from app.models.user import User
 from langchain_azure_ai.chat_models import AzureAIOpenAIApiChatModel
 from sqlalchemy.orm import Session
-from models.message import Message
-from respositories.conversation_repository import ConversationRepository
-from respositories.message_repository import MessageRepository
-from respositories.user_repository import UserRepository
-from schemas.models import ModelList, Role, StreamMessageRequest
+from app.models.message import Message
+from app.repositories.conversation_repository import ConversationRepository
+from app.repositories.message_repository import MessageRepository
+from app.repositories.user_repository import UserRepository
+from app.schemas.chat import ModelList, Role, StreamMessageRequest
 from langchain_core.documents import Document
-from services.rag_service import RagService
+from app.services.rag_service import RagService
 from dotenv import load_dotenv
 import tiktoken
 
@@ -83,7 +83,14 @@ class ChatStreamService:
 
         parts: list[str] = []
 
-        model = self.models_list[payload.model_id.value]
+        model_enum = ModelList(
+            payload.model_id) if payload.model_id in ModelList._value2member_map_ else None
+
+        model = self.models_list.get(
+            "gpt-5-nano") if model_enum is None else self.models_list.get(model_enum.value)
+
+        if not model:
+            raise ValueError(f"Model {payload.model_id} not found")
 
         user_input_tokens = 0
         try:
@@ -97,7 +104,7 @@ class ChatStreamService:
             role=Role.user,
             content=payload.user_content,
             conversation_id=payload.conversation_id,
-            model_id=payload.model_id.value,
+            model_id=payload.model_id,
             input_tokens=user_input_tokens,
             total_tokens=user_input_tokens,
         )
@@ -172,7 +179,7 @@ class ChatStreamService:
                 content=full_response,
                 role=Role.assistant,
                 conversation_id=payload.conversation_id,
-                model_id=payload.model_id.value,
+                model_id=payload.model_id,
                 input_tokens=total_assistant_input_tokens,
                 output_tokens=total_assistant_output_tokens,
                 total_tokens=total_assistant_total_tokens,

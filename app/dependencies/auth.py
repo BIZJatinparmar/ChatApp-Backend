@@ -6,10 +6,10 @@ from typing import Annotated
 from fastapi import Cookie, Depends, HTTPException, status
 from sqlalchemy.orm import Session as DbSession
 
-from db import get_db
-from models.session import Session
-from models.user import User
-from security.sessions import SESSION_COOKIE_NAME
+from app.core.database import get_db
+from app.models.session import Session
+from app.models.user import User
+from app.security.sessions import SESSION_COOKIE_NAME
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
     "admin": {"*"},

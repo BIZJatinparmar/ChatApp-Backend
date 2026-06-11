@@ -2,8 +2,8 @@
 
 from sqlalchemy.orm import Session
 
-from models.conversation import Conversation
-from models.message import Message
+from app.models.conversation import Conversation
+from app.models.message import Message
 
 
 class ConversationRepository:
@@ -24,6 +24,12 @@ class ConversationRepository:
 
     def get_conversation_messages(self, conversation_id: str):
         return self.db.query(Message).where(Message.conversation_id == conversation_id).order_by(Message.created_at.asc()).all()
+
+    def get_by_id_for_owner(self, conversation_id: str, owner_id: str):
+        return self.db.query(Conversation).where(
+            Conversation.id == conversation_id,
+            Conversation.owner_id == owner_id,
+        ).first()
 
     def update_conversation_title(self, conversation_id: str, title: str, owner_id: str):
         conversation = self.db.query(Conversation).where(

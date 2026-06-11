@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models.message import Message
+from app.models.message import Message
 
 
 class MessageRepository:
@@ -7,7 +7,7 @@ class MessageRepository:
         self.db = db
 
     def get_all_messages(self, conversation_id):
-        return self.db.query(Message).where(Message.conversation_id == conversation_id).order_by(Message.created_at.desc()).all()
+        return self.db.query(Message).where(Message.conversation_id == conversation_id).order_by(Message.created_at.asc()).all()
 
     def create_message(self, message: Message):
         self.db.add(message)
