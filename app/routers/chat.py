@@ -16,9 +16,9 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 async def get_docs(
     payload: StreamMessageRequest,
     db: Session = Depends(get_db),
-    _: User = Depends(require_permissions("chat:use")),
+    user: User = Depends(require_permissions("chat:use")),
 ):
-    return ChatService(db).get_docs(payload)
+    return ChatService(db).get_docs(payload, user)
 
 
 @router.post("/stream")

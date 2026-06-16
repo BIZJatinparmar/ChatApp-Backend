@@ -1,53 +1,43 @@
-# app/services/rag_service.py
-
-import os
-from langchain_openai import OpenAIEmbeddings
-from langchain_community.vectorstores import FAISS
-from langchain_core.messages import SystemMessage
 from langchain_core.documents import Document
+from langchain_core.messages import SystemMessage
+from langchain_postgres import PGVectorStore
+
+from app.models.user import User
 
 
 def format_context(docs: list[Document]) -> list[dict]:
     lines = []
-    for d in docs:
-        data = {
-            "src": d.metadata.get("source", "unknown"),
-            "page": d.metadata.get("page", "unknown"),
-            "text": d.page_content.strip().replace("\n", " ")
-        }
-        lines.append(data)
+    for doc in docs:
+        lines.append(
+            {
+                "src": doc.metadata.get("filename")
+                or doc.metadata.get("source", "unknown"),
+                "page": doc.metadata.get("page", "unknown"),
+                "text": doc.page_content.strip().replace("\n", " "),
+            }
+        )
 
     return lines
 
 
 class RagService:
-    def __init__(self):
-        self.embeddings = OpenAIEmbeddings()
-        self.faiss_path = os.path.abspath(
-            os.path.join(os.getcwd(), "../faiss_indices")
+    def __init__(self, vector_store: PGVectorStore):
+        self.vector_store = vector_store
+
+    def get_relevant_documents(self, user_content: str, user: User, k: int = 4) -> list[Document]:
+        return self.vector_store.similarity_search(
+            user_content,
+            k=k,
+            filter={"owner_id": user.id},
         )
 
-    def build_system_message(self, user_content: str) -> SystemMessage:
-        if not os.path.exists(self.faiss_path):
+    def build_system_message(self, user_content: str, user: User) -> SystemMessage:
+        docs = self.get_relevant_documents(user_content, user)
+        if not docs:
             return SystemMessage("You are a helpful AI assistant.")
 
-        vector_db = FAISS.load_local(
-            self.faiss_path,
-            self.embeddings,
-            allow_dangerous_deserialization=True,
-        )
-
-        retriever = vector_db.as_retriever(
-            search_type="similarity",
-            search_kwargs={"k": 4},
-        )
-
-        docs = retriever.invoke(user_content)
         context = format_context(docs)
-
-        system_message_text = self._build_prompt_from_context(context)
-
-        return SystemMessage(system_message_text)
+        return SystemMessage(self._build_prompt_from_context(context))
 
     def _build_prompt_from_context(self, context: list[dict]) -> str:
         system_message_text = """
@@ -58,10 +48,10 @@ If the answer is not in context, answer based on your own knowledge.
 Context:
 """
 
-        for c in context:
+        for item in context:
             system_message_text += (
-                f"- Source: {c['src']}, Page: {c['page']}\n"
-                f"  Text: {c['text']}\n"
+                f"- Source: {item['src']}, Page: {item['page']}\n"
+                f"  Text: {item['text']}\n"
             )
 
         return system_message_text

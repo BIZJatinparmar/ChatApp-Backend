@@ -6,6 +6,7 @@ from app.models.user import User
 from langchain_azure_ai.chat_models import AzureAIOpenAIApiChatModel
 from sqlalchemy.orm import Session
 from app.models.message import Message
+from app.core.database import get_vector_db
 from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.message_repository import MessageRepository
 from app.repositories.user_repository import UserRepository
@@ -58,7 +59,7 @@ class ChatStreamService:
         self.conversation_repository = ConversationRepository(
             self.db)
         self.user_repository = UserRepository(self.db)
-        self.rag_service = RagService()
+        self.rag_service = RagService(get_vector_db())
         self.models_list = {model.value: get_llm(
             model.value) for model in ModelList}
 
@@ -79,7 +80,7 @@ class ChatStreamService:
 
     async def stream_messages(self, payload: StreamMessageRequest, user: User):
         system_message = self.rag_service.build_system_message(
-            payload.user_content)
+            payload.user_content, user)
 
         parts: list[str] = []
 

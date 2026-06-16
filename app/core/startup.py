@@ -98,3 +98,31 @@ def bootstrap_auth_schema(engine: Engine) -> None:
         conn.execute(
             text("CREATE INDEX IF NOT EXISTS ix_budget_requests_status ON budget_requests (status)")
         )
+
+
+def bootstrap_document_schema(engine: Engine) -> None:
+    if engine.dialect.name != "sqlite":
+        return
+
+    with engine.begin() as conn:
+        if not _table_exists_sqlite(conn, "document"):
+            return
+
+        _add_column_sqlite_if_missing(conn, "document", "storage_path", "VARCHAR(500)")
+        _add_column_sqlite_if_missing(conn, "document", "content_type", "VARCHAR(100)")
+        _add_column_sqlite_if_missing(
+            conn, "document", "size_bytes", "INTEGER NOT NULL DEFAULT 0"
+        )
+        _add_column_sqlite_if_missing(
+            conn, "document", "status", "VARCHAR(20) NOT NULL DEFAULT 'ready'"
+        )
+        _add_column_sqlite_if_missing(
+            conn, "document", "chunk_count", "INTEGER NOT NULL DEFAULT 0"
+        )
+        _add_column_sqlite_if_missing(
+            conn, "document", "created_at", "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        )
+        _add_column_sqlite_if_missing(
+            conn, "document", "updated_at", "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
+        )
+        conn.execute(text("CREATE INDEX IF NOT EXISTS ix_document_owner_id ON document (owner_id)"))

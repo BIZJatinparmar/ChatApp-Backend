@@ -113,3 +113,4 @@ credentials.json
 service-account.json
 
 app.db
+uploaded_documents/*

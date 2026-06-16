@@ -1,15 +1,12 @@
-import os
-
 from fastapi import HTTPException
-from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
 from sqlalchemy.orm import Session
 
+from app.core.database import get_vector_db
 from app.models.user import User
 from app.schemas.chat import StreamMessageRequest
 from app.services.chat_stream_service import ChatStreamService
 from app.services.conversation_service import ConversationService
-from app.services.rag_service import format_context
+from app.services.rag_service import RagService, format_context
 
 
 class ChatService:
@@ -18,19 +15,9 @@ class ChatService:
         self.conversations = ConversationService(db)
         self.stream_service = ChatStreamService(db)
 
-    def get_docs(self, payload: StreamMessageRequest) -> list[dict]:
-        embeddings = OpenAIEmbeddings()
-        faiss_path = os.path.join(os.getcwd(), "../faiss_indices")
-        vector_db = FAISS.load_local(
-            faiss_path,
-            embeddings,
-            allow_dangerous_deserialization=True,
-        )
-        retriever = vector_db.as_retriever(
-            search_type="similarity",
-            search_kwargs={"k": 5, "score_threshold": 0.7},
-        )
-        docs = retriever.invoke(payload.user_content)
+    def get_docs(self, payload: StreamMessageRequest, user: User) -> list[dict]:
+        docs = RagService(get_vector_db()).get_relevant_documents(
+            payload.user_content, user, k=5)
         return format_context(docs)
 
     def stream_messages(self, payload: StreamMessageRequest, user: User):

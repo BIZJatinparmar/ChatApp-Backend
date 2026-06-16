@@ -19,6 +19,7 @@ ROLE_PERMISSIONS: dict[str, set[str]] = {
         "conversation:write",
         "message:write",
         "files:upload",
+        "document:manage",
     },
 }
 

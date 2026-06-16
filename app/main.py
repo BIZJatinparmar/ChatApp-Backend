@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.database import SQL_ENGINE
-from app.core.startup import bootstrap_auth_schema
+from app.core.startup import bootstrap_auth_schema, bootstrap_document_schema
 from app.models.base import Base
 from app.routers import (
     admin_usage,
@@ -11,6 +11,7 @@ from app.routers import (
     auth,
     budget_requests,
     chat,
+    document_router,
     conversations,
     files,
     messages,
@@ -21,6 +22,7 @@ from app.routers import (
 def create_app() -> FastAPI:
     bootstrap_auth_schema(SQL_ENGINE)
     Base.metadata.create_all(bind=SQL_ENGINE)
+    bootstrap_document_schema(SQL_ENGINE)
 
     app = FastAPI()
     app.include_router(auth.router)
@@ -32,6 +34,7 @@ def create_app() -> FastAPI:
     app.include_router(chat.router)
     app.include_router(conversations.router)
     app.include_router(messages.router)
+    app.include_router(document_router.router)
 
     app.add_middleware(
         CORSMiddleware,
