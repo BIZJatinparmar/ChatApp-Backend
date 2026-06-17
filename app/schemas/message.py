@@ -18,6 +18,7 @@ class MessageOut(BaseModel):
     role: str
     conversationId: str
     createdAt: datetime
+    payloadJson: dict
     modelId: str | None
     inputTokens: int
     outputTokens: int

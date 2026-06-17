@@ -13,6 +13,8 @@ from app.services.chat.prompt_builder import ChatPromptBuilder
 from app.services.chat.route_planner import ChatRoutePlanner
 from app.services.chat.tokens import parse_usage
 from app.services.chat_stream_service import ChatStreamService
+from app.services.conversation_service import ConversationService
+from app.services.document_service import DocumentService
 
 
 def make_state(
@@ -162,6 +164,7 @@ class ChatPromptBuilderTests(unittest.TestCase):
         self.assertEqual(
             result["citations"][0],
             {
+                "index": 1,
                 "documentId": "doc-1",
                 "fileName": "contract.pdf",
                 "page": 2,
@@ -169,6 +172,41 @@ class ChatPromptBuilderTests(unittest.TestCase):
             },
         )
         self.assertIn("Document context:", result["system_message"].content)
+        self.assertIn("Use numbered citation markers", result["system_message"].content)
+
+    def test_prompt_builder_omits_clickable_citations_without_document_id(self):
+        builder = ChatPromptBuilder()
+
+        result = builder.build_answer_prompt(
+            make_state(
+                "what is in the file?",
+                route="document_question",
+                context=[
+                    {
+                        "document_id": None,
+                        "src": "contract.pdf",
+                        "page": 2,
+                        "text": "Termination requires 30 days notice.",
+                    }
+                ],
+            )
+        )
+
+        self.assertEqual(result["citations"], [])
+
+
+class DocumentServiceTests(unittest.TestCase):
+    def test_pdf_page_metadata_uses_preview_page_numbers(self):
+        document = SimpleNamespace(
+            filename="contract.pdf",
+            owner_id="user-1",
+            id="doc-1",
+            filetype="pdf",
+        )
+
+        metadata = DocumentService._metadata(document, page=1)
+
+        self.assertEqual(metadata["page"], "1")
 
 
 class FakeMessageRepository:
@@ -189,6 +227,18 @@ class FakeConversationRepository:
 
     def update_conversation_title(self, conversation_id, title, owner_id):
         self.titles.append((conversation_id, title, owner_id))
+
+
+class FakeConversationReadRepository:
+    def __init__(self, conversation, messages):
+        self.conversation = conversation
+        self.messages = messages
+
+    def get_by_id(self, conversation_id):
+        return self.conversation
+
+    def get_conversation_messages(self, conversation_id):
+        return self.messages
 
 
 class FakeGraph:
@@ -301,6 +351,7 @@ class ChatStreamServiceTests(unittest.TestCase):
         self.assertEqual(assistant_message.output_tokens, 7)
         self.assertEqual(assistant_message.total_tokens, 13)
         self.assertEqual(assistant_message.payload_json["route"], "general_chat")
+        self.assertEqual(assistant_message.payload_json["citations"], [{"documentId": "doc-1"}])
         self.assertEqual(assistant_message.payload_json["citation_count"], 1)
 
     def test_stream_messages_rolls_back_and_emits_error_on_model_failure(self):
@@ -337,6 +388,35 @@ class ChatStreamServiceTests(unittest.TestCase):
         self.assertEqual(decoded, [{"type": "error", "message": "boom"}])
         self.assertTrue(service.db.rolled_back)
         self.assertFalse(service.db.committed)
+
+
+class ConversationServiceTests(unittest.TestCase):
+    def test_list_messages_serializes_payload_json(self):
+        service = ConversationService.__new__(ConversationService)
+        service.conversations = FakeConversationReadRepository(
+            SimpleNamespace(id="convo-1", owner_id="user-1"),
+            [
+                SimpleNamespace(
+                    id="msg-1",
+                    content="Answer [1]",
+                    role="assistant",
+                    conversation_id="convo-1",
+                    created_at="2026-06-17T00:00:00",
+                    payload_json={"citations": [{"index": 1, "documentId": "doc-1"}]},
+                    model_id="gpt-5-nano",
+                    input_tokens=1,
+                    output_tokens=2,
+                    total_tokens=3,
+                )
+            ],
+        )
+
+        result = service.list_messages("convo-1", SimpleNamespace(id="user-1"))
+
+        self.assertEqual(
+            result.messages[0].payloadJson,
+            {"citations": [{"index": 1, "documentId": "doc-1"}]},
+        )
 
 
 async def collect_stream(stream):

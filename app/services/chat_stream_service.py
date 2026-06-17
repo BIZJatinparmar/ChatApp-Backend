@@ -237,6 +237,7 @@ class ChatStreamService:
                     "retrieval_used": graph_state["retrieval_used"],
                     "retrieval_query": graph_state["retrieval_query"],
                     "answer_kind": graph_state["answer_kind"],
+                    "citations": graph_state["citations"],
                     "citation_count": len(graph_state["citations"]),
                 },
             )

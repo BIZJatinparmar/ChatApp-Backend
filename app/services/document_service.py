@@ -144,7 +144,7 @@ class DocumentService:
             pages = [
                 LangchainDocument(
                     page_content=page.extract_text() or "",
-                    metadata=self._metadata(document, page=index),
+                    metadata=self._metadata(document, page=index + 1),
                 )
                 for index, page in enumerate(reader.pages)
             ]

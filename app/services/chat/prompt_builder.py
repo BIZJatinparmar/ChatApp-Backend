@@ -28,16 +28,22 @@ class ChatPromptBuilder:
                     "status_events": state["status_events"] + ["no_document_match"],
                 }
 
+            cited_context = [
+                {**item, "citation_index": index}
+                for index, item in enumerate(state["context"], start=1)
+            ]
             citations = [
                 {
-                    "documentId": item.get("document_id") or item.get("src"),
+                    "index": item["citation_index"],
+                    "documentId": item["document_id"],
                     "fileName": item.get("src", "unknown"),
                     "page": item.get("page", "unknown"),
                     "quote": item.get("text", "")[:300],
                 }
-                for item in state["context"]
+                for item in cited_context
+                if item.get("document_id")
             ]
-            prompt = self.document_system_prompt(state["context"])
+            prompt = self.document_system_prompt(cited_context)
             return {
                 "answer_kind": "documents",
                 "system_message": SystemMessage(prompt),
@@ -61,8 +67,10 @@ Do not invent clauses, numbers, dates, names, or obligations.
 Document context:
 """
         for index, item in enumerate(context, start=1):
+            citation_index = item.get("citation_index", index)
             prompt += (
-                f"\n[{index}] Source: {item['src']}, Page: {item['page']}\n"
+                f"\n[{citation_index}] Source: {item['src']}, Page: {item['page']}\n"
                 f"{item['text']}\n"
             )
+        prompt += "\nUse numbered citation markers like [1] and [2] for claims supported by the document context."
         return prompt

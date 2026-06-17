@@ -62,6 +62,7 @@ class ConversationService:
                     "role": data.role,
                     "conversationId": data.conversation_id,
                     "createdAt": data.created_at,
+                    "payloadJson": data.payload_json or {},
                     "modelId": data.model_id,
                     "inputTokens": data.input_tokens,
                     "outputTokens": data.output_tokens,
