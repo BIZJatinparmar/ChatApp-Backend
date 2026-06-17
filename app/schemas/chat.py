@@ -14,8 +14,15 @@ class Role(str, Enum):
     system = "system"
 
 
+class ChatMode(str, Enum):
+    auto = "auto"
+    document_only = "document_only"
+    general_only = "general_only"
+
+
 class StreamMessageRequest(BaseModel):
     message_id: str
     user_content: str
     conversation_id: str
     model_id: str
+    chat_mode: ChatMode = ChatMode.auto

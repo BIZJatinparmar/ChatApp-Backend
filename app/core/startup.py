@@ -39,9 +39,6 @@ def bootstrap_auth_schema(engine: Engine) -> None:
         )
         _add_column_sqlite_if_missing(conn, "users", "is_active", "BOOLEAN NOT NULL DEFAULT 1")
         _add_column_sqlite_if_missing(conn, "users", "token_budget", "INTEGER NOT NULL DEFAULT 0")
-        _add_column_sqlite_if_missing(conn, "users", "input_tokens", "INTEGER NOT NULL DEFAULT 0")
-        _add_column_sqlite_if_missing(conn, "users", "output_tokens", "INTEGER NOT NULL DEFAULT 0")
-        _add_column_sqlite_if_missing(conn, "users", "total_tokens", "INTEGER NOT NULL DEFAULT 0")
 
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_users_tenant_id ON users (tenant_id)"))
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_users_microsoft_oid ON users (microsoft_oid)"))

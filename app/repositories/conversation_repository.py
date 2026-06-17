@@ -43,14 +43,3 @@ class ConversationRepository:
         self.db.commit()
         self.db.refresh(conversation)
         return conversation
-
-    def increment_usage(self, conversation_id: str, input_tokens: int, output_tokens: int, total_tokens: int):
-        conversation = self.db.query(Conversation).where(
-            Conversation.id == conversation_id).first()
-        if not conversation:
-            return None
-        conversation.input_tokens += int(input_tokens)
-        conversation.output_tokens += int(output_tokens)
-        conversation.total_tokens += int(total_tokens)
-        self.db.flush()
-        return conversation

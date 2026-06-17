@@ -10,6 +10,7 @@ def format_context(docs: list[Document]) -> list[dict]:
     for doc in docs:
         lines.append(
             {
+                "document_id": doc.metadata.get("document_id"),
                 "src": doc.metadata.get("filename")
                 or doc.metadata.get("source", "unknown"),
                 "page": doc.metadata.get("page", "unknown"),
@@ -30,6 +31,34 @@ class RagService:
             k=k,
             filter={"owner_id": user.id},
         )
+
+    def get_ranked_context(
+        self,
+        user_content: str,
+        user: User,
+        initial_k: int = 20,
+        final_k: int = 8,
+    ) -> list[Document]:
+        docs = self.get_relevant_documents(user_content, user, k=initial_k)
+        deduped: list[Document] = []
+        seen: set[tuple[str, str, str]] = set()
+
+        for doc in docs:
+            key = (
+                str(doc.metadata.get("document_id", "")),
+                str(doc.metadata.get("page", "")),
+                doc.page_content.strip()[:300],
+            )
+            if key in seen:
+                continue
+
+            seen.add(key)
+            deduped.append(doc)
+
+            if len(deduped) >= final_k:
+                break
+
+        return deduped
 
     def build_system_message(self, user_content: str, user: User) -> SystemMessage:
         docs = self.get_relevant_documents(user_content, user)

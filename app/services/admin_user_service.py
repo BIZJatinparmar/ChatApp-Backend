@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session as DbSession
 
 from app.models.user import User
+from app.repositories.usage_repository import UsageRepository
 from app.repositories.user_permission_repository import UserPermissionRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import AdminUserCreateIn, AdminUserUpdateIn, UserOut
@@ -13,9 +14,12 @@ class AdminUserService:
         self.db = db
         self.users = UserRepository(db)
         self.permissions = UserPermissionRepository(db)
+        self.usage = UsageRepository(db)
 
     def list_users(self, admin_user: User) -> list[UserOut]:
-        return [to_user_out(user) for user in self.users.list_for_tenant(admin_user.tenant_id)]
+        users = self.users.list_for_tenant(admin_user.tenant_id)
+        usage_by_user = self.usage.usage_for_users([user.id for user in users])
+        return [to_user_out(user, usage_by_user[user.id]) for user in users]
 
     def create_user(self, payload: AdminUserCreateIn, admin_user: User) -> UserOut:
         if not admin_user.tenant_id:
@@ -39,7 +43,7 @@ class AdminUserService:
         self.permissions.replace_for_user(user.id, payload.permissions)
         self.db.commit()
         self.db.refresh(user)
-        return to_user_out(user)
+        return to_user_out(user, self.usage.usage_for_user(user.id))
 
     def update_user(self, user_id: str, payload: AdminUserUpdateIn, admin_user: User) -> UserOut:
         user = self.users.get_by_id(user_id)
@@ -59,4 +63,4 @@ class AdminUserService:
 
         self.db.commit()
         self.db.refresh(user)
-        return to_user_out(user)
+        return to_user_out(user, self.usage.usage_for_user(user.id))

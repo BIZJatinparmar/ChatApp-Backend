@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session as DbSession
 from app.models.session import Session
 from app.models.user import User
 from app.repositories.session_repository import SessionRepository
+from app.repositories.usage_repository import UsageRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import MicrosoftLoginIn
 from app.schemas.user import AppRole, UserOut
@@ -26,6 +27,7 @@ class AuthService:
         self.db = db
         self.users = UserRepository(db)
         self.sessions = SessionRepository(db)
+        self.usage = UsageRepository(db)
 
     def microsoft_login(self, payload: MicrosoftLoginIn, response: Response) -> UserOut:
         try:
@@ -64,7 +66,7 @@ class AuthService:
         self.sessions.create(Session(id=session_id, user_id=user.id, expires_at=compute_expiry()))
         self.db.commit()
         set_session_cookie(response, session_id)
-        return to_user_out(user)
+        return to_user_out(user, self.usage.usage_for_user(user.id))
 
     def logout(self, response: Response, session_id: str | None) -> dict[str, bool]:
         if session_id:

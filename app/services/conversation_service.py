@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.conversation import Conversation
 from app.models.user import User
 from app.repositories.conversation_repository import ConversationRepository
+from app.repositories.usage_repository import UsageRepository
 from app.schemas.conversation import ConversationCreateRequest, ConversationListResponse
 from app.schemas.message import ConversationMessagesResponse
 
@@ -22,9 +23,13 @@ class ConversationService:
     def __init__(self, db: Session):
         self.db = db
         self.conversations = ConversationRepository(db)
+        self.usage = UsageRepository(db)
 
     def list_for_user(self, user: User) -> ConversationListResponse:
         conversation_data = self.conversations.get_all_conversations(user.id)
+        usage_by_conversation = self.usage.usage_for_conversations(
+            [conversation.id for conversation in conversation_data]
+        )
         return ConversationListResponse(
             conversations=[
                 {
@@ -33,9 +38,9 @@ class ConversationService:
                     "ownerId": data.owner_id,
                     "createdAt": data.created_at,
                     "updatedAt": data.updated_at,
-                    "inputTokens": data.input_tokens,
-                    "outputTokens": data.output_tokens,
-                    "totalTokens": data.total_tokens,
+                    "inputTokens": usage_by_conversation[data.id]["input_tokens"],
+                    "outputTokens": usage_by_conversation[data.id]["output_tokens"],
+                    "totalTokens": usage_by_conversation[data.id]["total_tokens"],
                 }
                 for data in conversation_data
             ]

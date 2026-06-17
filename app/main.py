@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from lmnr import Laminar
 from app.core.config import settings
 from app.core.database import SQL_ENGINE
 from app.core.startup import bootstrap_auth_schema, bootstrap_document_schema
@@ -23,6 +23,7 @@ def create_app() -> FastAPI:
     bootstrap_auth_schema(SQL_ENGINE)
     Base.metadata.create_all(bind=SQL_ENGINE)
     bootstrap_document_schema(SQL_ENGINE)
+    Laminar.initialize()
 
     app = FastAPI()
     app.include_router(auth.router)

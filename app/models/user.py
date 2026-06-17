@@ -37,12 +37,6 @@ class User(Base):
         String(20), nullable=False, default="microsoft", server_default="microsoft")
     is_active: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default="1")
-    input_tokens: Mapped[int] = mapped_column(
-        Integer, default=0, nullable=False, server_default="0")
-    output_tokens: Mapped[int] = mapped_column(
-        Integer, default=0, nullable=False, server_default="0")
-    total_tokens: Mapped[int] = mapped_column(
-        Integer, default=0, nullable=False, server_default="0")
     token_budget: Mapped[int] = mapped_column(
         Integer, default=0, nullable=False, server_default="0")
     created_at: Mapped[datetime] = mapped_column(
