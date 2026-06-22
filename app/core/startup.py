@@ -123,3 +123,71 @@ def bootstrap_document_schema(engine: Engine) -> None:
             conn, "document", "updated_at", "DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
         )
         conn.execute(text("CREATE INDEX IF NOT EXISTS ix_document_owner_id ON document (owner_id)"))
+
+
+def bootstrap_rag_retrieval_event_schema(engine: Engine) -> None:
+    if engine.dialect.name != "sqlite":
+        return
+
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                "CREATE TABLE IF NOT EXISTS rag_retrieval_events ("
+                "id VARCHAR(36) PRIMARY KEY, "
+                "message_id VARCHAR(36) NOT NULL, "
+                "conversation_id VARCHAR(36) NOT NULL, "
+                "user_id VARCHAR(36) NOT NULL, "
+                "chat_mode VARCHAR(30) NOT NULL, "
+                "route VARCHAR(30) NOT NULL, "
+                "route_confidence VARCHAR(20) NOT NULL, "
+                "original_query TEXT NOT NULL, "
+                "rewritten_query TEXT NOT NULL, "
+                "rewrite_used BOOLEAN NOT NULL DEFAULT 0, "
+                "rewrite_source VARCHAR(20) NOT NULL DEFAULT 'none', "
+                "rewrite_confidence VARCHAR(20) NOT NULL DEFAULT 'low', "
+                "initial_k INTEGER NOT NULL DEFAULT 0, "
+                "final_k INTEGER NOT NULL DEFAULT 0, "
+                "retrieval_confidence VARCHAR(20) NOT NULL DEFAULT 'low', "
+                "retrieved_chunk_count INTEGER NOT NULL DEFAULT 0, "
+                "selected_chunk_count INTEGER NOT NULL DEFAULT 0, "
+                "retrieved_document_ids JSON NOT NULL DEFAULT '[]', "
+                "selected_context JSON NOT NULL DEFAULT '[]', "
+                "fallback_reason VARCHAR(100), "
+                "latency_ms INTEGER NOT NULL DEFAULT 0, "
+                "created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+                "FOREIGN KEY(message_id) REFERENCES messages(id) ON DELETE CASCADE, "
+                "FOREIGN KEY(conversation_id) REFERENCES conversations(id) ON DELETE CASCADE, "
+                "FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE"
+                ")"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_rag_retrieval_events_message_id "
+                "ON rag_retrieval_events (message_id)"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_rag_retrieval_events_conversation_id "
+                "ON rag_retrieval_events (conversation_id)"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_rag_retrieval_events_user_id "
+                "ON rag_retrieval_events (user_id)"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_rag_retrieval_events_conversation_created "
+                "ON rag_retrieval_events (conversation_id, created_at)"
+            )
+        )
+        conn.execute(
+            text(
+                "CREATE INDEX IF NOT EXISTS ix_rag_retrieval_events_user_created "
+                "ON rag_retrieval_events (user_id, created_at)"
+            )
+        )

@@ -1,0 +1,280 @@
+{
+  "defaults": {
+    "user_id": "170a4024-1c07-4724-9412-a642172aad43",
+    "chat_mode": "document_only"
+  },
+  "cases": [
+    {
+      "name": "nippon_followup_resource_allocation",
+      "history": [
+        {
+          "role": "user",
+          "content": "Summarize the Nippon Life enterprise agentic AI platform SOW."
+        },
+        {
+          "role": "assistant",
+          "content": "The Nippon Life SOW is for an enterprise agentic AI platform for intelligent agent operations and automation."
+        }
+      ],
+      "user_content": "What is the resource allocation?",
+      "expected": {
+        "route": "document_question",
+        "generated_query_terms_all": ["Nippon Life", "resource allocation"],
+        "generated_query_forbidden_terms_any": ["Tata Sons", "Wipro"],
+        "min_rewrite_confidence": "medium",
+        "selected_document_ids_any": ["35a7c0ce-f1ee-43ad-94a9-6febfc2f851d"],
+        "selected_pages_any": ["10"],
+        "required_terms_all": [
+          "Resource Allocation",
+          "Lead Gen AI Engineer",
+          "Senior Gen-AI Engineer",
+          "PMO"
+        ],
+        "min_confidence": "medium",
+        "fallback_reason": null
+      }
+    },
+    {
+      "name": "nippon_followup_azure_architecture",
+      "history": [
+        {
+          "role": "user",
+          "content": "We are reviewing the Nippon Life SOW for the agentic AI chatbot platform."
+        },
+        {
+          "role": "assistant",
+          "content": "The SOW describes Azure services for the chatbot, RAG, API orchestration, PDF workflow, security, and monitoring."
+        }
+      ],
+      "user_content": "Which Azure components are proposed for security, frontend, API, storage, monitoring, and AI?",
+      "expected": {
+        "route": "document_question",
+        "generated_query_terms_all": ["Nippon Life", "Azure"],
+        "generated_query_terms_any": ["architecture", "components", "security"],
+        "selected_document_ids_any": ["35a7c0ce-f1ee-43ad-94a9-6febfc2f851d"],
+        "selected_pages_any": ["5", "6"],
+        "required_terms_all": [
+          "Azure WAF",
+          "Azure Static Web Apps",
+          "Azure Key Vault",
+          "Azure OpenAI"
+        ],
+        "min_confidence": "medium",
+        "fallback_reason": null
+      }
+    },
+    {
+      "name": "tata_followup_deep_research_objective",
+      "history": [
+        {
+          "role": "user",
+          "content": "Summarize the Tata Sons Deep Research AI RAG SOW."
+        },
+        {
+          "role": "assistant",
+          "content": "The Tata Sons SOW is about innovation intelligence, strategic decision support, patent intelligence, and white space analysis."
+        }
+      ],
+      "user_content": "What is the main project objective and what inputs does the system use?",
+      "expected": {
+        "route": "document_question",
+        "generated_query_terms_all": ["Tata Sons", "Deep Research AI RAG"],
+        "generated_query_terms_any": ["innovation", "patent", "white space"],
+        "generated_query_forbidden_terms_any": ["Nippon", "Wipro"],
+        "min_rewrite_confidence": "medium",
+        "selected_document_ids_any": ["f814d17c-d0f8-4b5c-9cfd-907314ec2b15"],
+        "selected_pages_any": ["3", "4"],
+        "required_terms_all": [
+          "Deep Research AI RAG",
+          "internal innovation data",
+          "patent databases",
+          "White Space Analysis"
+        ],
+        "min_confidence": "medium",
+        "fallback_reason": null
+      }
+    },
+    {
+      "name": "tata_followup_resource_allocation",
+      "history": [
+        {
+          "role": "user",
+          "content": "We are looking at the Tata Sons Deep Research AI RAG SOW."
+        },
+        {
+          "role": "assistant",
+          "content": "It includes discovery, data ingestion, agent development, front-end work, UAT, and deployment."
+        }
+      ],
+      "user_content": "What is the timeline and resource allocation?",
+      "expected": {
+        "route": "document_question",
+        "generated_query_terms_all": ["Tata Sons", "resource allocation"],
+        "generated_query_terms_any": ["timeline", "duration"],
+        "generated_query_forbidden_terms_any": ["Nippon", "Wipro"],
+        "min_rewrite_confidence": "medium",
+        "selected_document_ids_any": ["f814d17c-d0f8-4b5c-9cfd-907314ec2b15"],
+        "selected_pages_any": ["12"],
+        "required_terms_all": [
+          "Timeline total weeks",
+          "Agent Development",
+          "Lead Gen AI Engineer",
+          "Data Engineer"
+        ],
+        "min_confidence": "medium",
+        "fallback_reason": null
+      }
+    },
+    {
+      "name": "abg_followup_platform_capabilities",
+      "history": [
+        {
+          "role": "user",
+          "content": "Review the ABG IntelAct 1.0 Gen AI Platform overview."
+        },
+        {
+          "role": "assistant",
+          "content": "The overview covers platform capabilities, channels, security, use cases, deployment architecture, and IntelAct 2.0 focus areas."
+        }
+      ],
+      "user_content": "What capabilities, channels, security posture, and usage statistics are listed?",
+      "expected": {
+        "route": "document_question",
+        "generated_query_terms_all": ["ABG IntelAct", "capabilities"],
+        "generated_query_terms_any": ["channels", "security", "usage statistics"],
+        "selected_document_ids_any": ["863222c2-7298-4049-9b9a-6e566c37414b"],
+        "selected_pages_any": ["3", "5"],
+        "required_terms_all": [
+          "multi-large language models",
+          "Agent creation studio",
+          "50,000+ Users",
+          "ABG Cloud"
+        ],
+        "min_confidence": "medium",
+        "fallback_reason": null
+      }
+    },
+    {
+      "name": "abg_followup_current_challenges",
+      "history": [
+        {
+          "role": "user",
+          "content": "We need the current challenges from the ABG IntelAct 1.0 overview."
+        },
+        {
+          "role": "assistant",
+          "content": "The document separates functional, UX, technical, product, and cost optimization challenges."
+        }
+      ],
+      "user_content": "What are the product, UX, technical, and cost-management challenges?",
+      "expected": {
+        "route": "document_question",
+        "generated_query_terms_all": ["ABG IntelAct", "current challenges"],
+        "generated_query_terms_any": ["cost", "technical", "UX"],
+        "selected_document_ids_any": ["863222c2-7298-4049-9b9a-6e566c37414b"],
+        "selected_pages_any": ["8", "14"],
+        "required_terms_all": [
+          "Advanced Conversation Intelligence",
+          "50 MB",
+          "Configurable User Mgmt",
+          "Cost management"
+        ],
+        "min_confidence": "medium",
+        "fallback_reason": null
+      }
+    },
+    {
+      "name": "wipro_followup_validation_scope",
+      "history": [
+        {
+          "role": "user",
+          "content": "Summarize the Wipro AI-powered intelligent invoice processing SOW."
+        },
+        {
+          "role": "assistant",
+          "content": "The Wipro SOW covers invoice ingestion, document extraction, PO validation, workflow automation, ServiceNow integration, and Power BI dashboards."
+        }
+      ],
+      "user_content": "What is included in validation and reconciliation?",
+      "expected": {
+        "route": "document_question",
+        "generated_query_terms_all": ["Wipro", "validation"],
+        "generated_query_terms_any": ["reconciliation", "PO matching", "invoice"],
+        "generated_query_forbidden_terms_any": ["Tata Sons", "Nippon"],
+        "min_rewrite_confidence": "medium",
+        "selected_document_ids_any": ["c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99"],
+        "selected_pages_any": ["8", "9"],
+        "required_terms_all": [
+          "PO-to-Invoice Validation",
+          "Three-Way Matching",
+          "Duplicate Invoice Detection",
+          "Azure OpenAI"
+        ],
+        "min_confidence": "medium",
+        "fallback_reason": null
+      }
+    },
+    {
+      "name": "wipro_followup_timeline_and_resources",
+      "history": [
+        {
+          "role": "user",
+          "content": "We are using the Wipro invoice processing SOW."
+        },
+        {
+          "role": "assistant",
+          "content": "It describes extraction, validation and ticketing, workflow automation, Power BI dashboards, UAT, and resource allocation."
+        }
+      ],
+      "user_content": "Find the phase durations and roles with FTEs.",
+      "expected": {
+        "route": "document_question",
+        "generated_query_terms_all": ["Wipro", "FTE"],
+        "generated_query_terms_any": ["timeline", "phase durations", "resource allocation"],
+        "generated_query_forbidden_terms_any": ["Tata Sons", "Nippon"],
+        "min_rewrite_confidence": "medium",
+        "selected_document_ids_any": ["c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99"],
+        "selected_pages_any": ["13"],
+        "required_terms_all": [
+          "Requirement & Setup",
+          "Workflow Automation",
+          "Lead Gen AI Engineer",
+          "Power BI"
+        ],
+        "min_confidence": "medium",
+        "fallback_reason": null
+      }
+    },
+    {
+      "name": "wipro_followup_azure_boq",
+      "history": [
+        {
+          "role": "user",
+          "content": "Look at the Azure BOQ section in the Wipro invoice processing SOW."
+        },
+        {
+          "role": "assistant",
+          "content": "The BOQ includes assumptions for invoice pages, supporting document pages, Document Intelligence, Microsoft Fabric, Azure OpenAI, storage, and total monthly cost."
+        }
+      ],
+      "user_content": "What are the cost assumptions and total monthly estimate?",
+      "expected": {
+        "route": "document_question",
+        "generated_query_terms_all": ["Wipro", "Azure BOQ"],
+        "generated_query_terms_any": ["cost assumptions", "monthly estimate"],
+        "generated_query_forbidden_terms_any": ["Tata Sons", "Nippon"],
+        "min_rewrite_confidence": "medium",
+        "selected_document_ids_any": ["c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99"],
+        "selected_pages_any": ["14", "15"],
+        "required_terms_all": [
+          "Average two pages per invoice",
+          "Total pages processed",
+          "Microsoft Fabric",
+          "Total $8,553.59"
+        ],
+        "min_confidence": "medium",
+        "fallback_reason": null
+      }
+    }
+  ]
+}

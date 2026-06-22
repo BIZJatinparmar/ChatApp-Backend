@@ -5,6 +5,7 @@ from langgraph.graph import END, StateGraph
 from sqlalchemy.orm import Session
 
 from app.models.message import Message
+from app.models.rag_retrieval_event import RagRetrievalEvent
 from app.models.user import User
 from app.repositories.conversation_repository import ConversationRepository
 from app.repositories.message_repository import MessageRepository
@@ -43,6 +44,7 @@ class ChatStreamService:
         graph = StateGraph(AgentState)
         graph.add_node("fast_route", self.route_planner.fast_route)
         graph.add_node("router_and_rewrite", self.route_planner.router_and_rewrite)
+        graph.add_node("plan_retrieval", self.route_planner.plan_retrieval)
         graph.add_node("retrieve_documents", self.document_context.retrieve_documents)
         graph.add_node("build_answer_prompt", self.prompt_builder.build_answer_prompt)
 
@@ -52,7 +54,7 @@ class ChatStreamService:
             self.route_planner.after_route,
             {
                 "router": "router_and_rewrite",
-                "retrieve": "retrieve_documents",
+                "plan": "plan_retrieval",
                 "answer": "build_answer_prompt",
             },
         )
@@ -61,6 +63,14 @@ class ChatStreamService:
             self.route_planner.after_route,
             {
                 "router": "build_answer_prompt",
+                "plan": "plan_retrieval",
+                "answer": "build_answer_prompt",
+            },
+        )
+        graph.add_conditional_edges(
+            "plan_retrieval",
+            self.route_planner.after_plan,
+            {
                 "retrieve": "retrieve_documents",
                 "answer": "build_answer_prompt",
             },
@@ -85,7 +95,20 @@ class ChatStreamService:
             "route": "needs_router",
             "route_reason": "",
             "route_confidence": "low",
+            "original_query": payload.user_content,
             "retrieval_query": payload.user_content,
+            "rewrite_used": False,
+            "rewrite_source": "none",
+            "rewrite_confidence": "low",
+            "initial_k": 0,
+            "final_k": 0,
+            "retrieval_confidence": "low",
+            "retrieved_chunk_count": 0,
+            "selected_chunk_count": 0,
+            "retrieved_document_ids": [],
+            "selected_context": [],
+            "fallback_reason": None,
+            "retrieval_latency_ms": 0,
             "rag_docs": [],
             "context": [],
             "system_message": SystemMessage("You are a helpful AI assistant."),
@@ -235,7 +258,13 @@ class ChatStreamService:
                     "route_confidence": graph_state["route_confidence"],
                     "router_used": graph_state["router_used"],
                     "retrieval_used": graph_state["retrieval_used"],
+                    "original_query": graph_state["original_query"],
                     "retrieval_query": graph_state["retrieval_query"],
+                    "rewrite_used": graph_state["rewrite_used"],
+                    "rewrite_source": graph_state["rewrite_source"],
+                    "rewrite_confidence": graph_state["rewrite_confidence"],
+                    "retrieval_confidence": graph_state["retrieval_confidence"],
+                    "fallback_reason": graph_state["fallback_reason"],
                     "answer_kind": graph_state["answer_kind"],
                     "citations": graph_state["citations"],
                     "citation_count": len(graph_state["citations"]),
@@ -243,6 +272,7 @@ class ChatStreamService:
             )
 
             self.message_repository.create_message(assistant_message)
+            self._persist_rag_retrieval_event(graph_state, assistant_message.id)
             self.db.commit()
 
             yield to_ndjson({"type": "done"})
@@ -250,3 +280,32 @@ class ChatStreamService:
         except Exception as e:
             self.db.rollback()
             yield to_ndjson({"type": "error", "message": str(e)})
+
+    def _persist_rag_retrieval_event(self, graph_state: AgentState, assistant_message_id: str) -> None:
+        if not graph_state["retrieval_used"]:
+            return
+
+        self.db.add(
+            RagRetrievalEvent(
+                message_id=assistant_message_id,
+                conversation_id=graph_state["payload"].conversation_id,
+                user_id=graph_state["user"].id,
+                chat_mode=graph_state["chat_mode"].value,
+                route=graph_state["route"],
+                route_confidence=graph_state["route_confidence"],
+                original_query=graph_state["original_query"],
+                rewritten_query=graph_state["retrieval_query"],
+                rewrite_used=graph_state["rewrite_used"],
+                rewrite_source=graph_state["rewrite_source"],
+                rewrite_confidence=graph_state["rewrite_confidence"],
+                initial_k=graph_state["initial_k"],
+                final_k=graph_state["final_k"],
+                retrieval_confidence=graph_state["retrieval_confidence"],
+                retrieved_chunk_count=graph_state["retrieved_chunk_count"],
+                selected_chunk_count=graph_state["selected_chunk_count"],
+                retrieved_document_ids=graph_state["retrieved_document_ids"],
+                selected_context=graph_state["selected_context"],
+                fallback_reason=graph_state["fallback_reason"],
+                latency_ms=graph_state["retrieval_latency_ms"],
+            )
+        )

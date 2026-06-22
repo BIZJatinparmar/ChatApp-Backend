@@ -6,7 +6,7 @@ from langchain.messages import HumanMessage
 from app.models.user import User
 from app.schemas.chat import ChatMode, ModelList
 from app.services.chat.tokens import count_tokens, parse_usage
-from app.services.chat.types import AgentState, MessageRouterStructure
+from app.services.chat.types import AgentState, MessageRouterStructure, QueryRewriteStructure
 
 
 class RouterLlm(Protocol):
@@ -123,6 +123,11 @@ class ChatRoutePlanner:
         if state["route"] == "needs_router":
             return "router"
         if state["route"] == "document_question":
+            return "plan"
+        return "answer"
+
+    def after_plan(self, state: AgentState) -> str:
+        if state["route"] == "document_question":
             return "retrieve"
         return "answer"
 
@@ -188,6 +193,7 @@ Latest user message:
             route = "general_chat"
 
         retrieval_query = response.rewritten_query or state["payload"].user_content
+        rewrite_used = bool(response.rewritten_query and retrieval_query != state["payload"].user_content)
         status_events = list(state["status_events"])
         if route == "document_question":
             status_events.append("searching_documents")
@@ -197,7 +203,124 @@ Latest user message:
             "route_reason": response.reasoning,
             "route_confidence": response.confidence,
             "retrieval_query": retrieval_query,
+            "rewrite_used": rewrite_used,
+            "rewrite_source": "llm" if rewrite_used else "none",
+            "rewrite_confidence": response.confidence if rewrite_used else "low",
             "usage": usage,
             "status_events": status_events,
             "router_used": True,
         }
+
+    def plan_retrieval(self, state: AgentState) -> dict:
+        if state["route"] != "document_question":
+            return {}
+
+        initial_k = 40 if state["chat_mode"] == ChatMode.document_only else 30
+        final_k = 8
+
+        if state["rewrite_source"] == "llm" and state["retrieval_query"].strip():
+            return {
+                "initial_k": initial_k,
+                "final_k": final_k,
+            }
+
+        original_query = state["payload"].user_content
+        rewritten_query = original_query
+        rewrite_source = "none"
+        rewrite_confidence = "low"
+
+        try:
+            response, usage = self._llm_rewrite(state)
+            if response.rewritten_query and response.rewritten_query.strip():
+                rewritten_query = response.rewritten_query.strip()
+                rewrite_source = "llm"
+                rewrite_confidence = response.confidence
+            else:
+                usage = dict(usage)
+            update = {
+                "usage": usage,
+            }
+        except Exception:
+            rewritten_query = self._heuristic_rewrite(state)
+            rewrite_source = "heuristic" if rewritten_query != original_query else "none"
+            rewrite_confidence = "medium" if rewrite_source == "heuristic" else "low"
+            update = {}
+
+        update.update(
+            {
+                "retrieval_query": rewritten_query,
+                "rewrite_used": rewritten_query != original_query,
+                "rewrite_source": rewrite_source,
+                "rewrite_confidence": rewrite_confidence,
+                "initial_k": initial_k,
+                "final_k": final_k,
+            }
+        )
+        return update
+
+    def _llm_rewrite(self, state: AgentState) -> tuple[QueryRewriteStructure, dict]:
+        if self.llm_factory is None:
+            from app.services.chat.llm_client import get_llm
+
+            self.llm_factory = cast(Callable[[str, float], RouterLlm], get_llm)
+
+        rewrite_model = ModelList.gpt_5_4_nano_1.value
+        rewrite_llm = self.llm_factory(rewrite_model, 0)
+        structured_rewriter = rewrite_llm.with_structured_output(
+            QueryRewriteStructure,
+            method="function_calling",
+            include_raw=True,
+        )
+        recent_messages = "\n".join(
+            f"{message.type}: {message.content}" for message in state["history"][-6:]
+        )
+        prompt = f"""Rewrite the latest user message into a standalone search query for uploaded documents.
+Use recent chat history only to resolve references like "it", "that section", or "what about termination".
+Do not answer the question. Do not include instructions to the assistant.
+If the latest message is not about uploaded documents, return rewritten_query as null.
+
+Available document count: {state['available_document_count']}
+Route reason: {state['route_reason']}
+Recent messages:
+{recent_messages}
+
+Latest user message:
+{state['payload'].user_content}
+"""
+        structured_response = structured_rewriter.invoke([HumanMessage(content=prompt)])
+        response = structured_response.get("parsed")
+        raw_response = structured_response.get("raw")
+        parsing_error = structured_response.get("parsing_error")
+        if parsing_error or response is None:
+            raise ValueError("Query rewrite structured output failed.")
+
+        usage = dict(state["usage"])
+        raw_usage = (
+            getattr(raw_response, "usage_metadata", None)
+            if raw_response is not None
+            else None
+        )
+        rewrite_input_tokens, rewrite_output_tokens, _ = parse_usage(raw_usage)
+        usage["router_input_tokens"] += (
+            rewrite_input_tokens or count_tokens(rewrite_llm, prompt)
+        )
+        usage["router_output_tokens"] += (
+            rewrite_output_tokens or count_tokens(rewrite_llm, response.model_dump_json())
+        )
+        return response, usage
+
+    def _heuristic_rewrite(self, state: AgentState) -> str:
+        user_content = state["payload"].user_content.strip()
+        if len(user_content.split()) >= 6:
+            return user_content
+
+        history_bits = [
+            str(message.content).strip()
+            for message in state["history"][-4:]
+            if str(message.content).strip()
+        ]
+        if not history_bits:
+            return user_content
+
+        context = " ".join(history_bits)[-500:]
+        return f"{user_content} Context from recent conversation: {context}"

@@ -148,8 +148,11 @@ class DocumentService:
                 )
                 for index, page in enumerate(reader.pages)
             ]
-            return splitter.split_documents(
-                [page for page in pages if page.page_content.strip()]
+            return self._with_chunk_metadata(
+                document,
+                splitter.split_documents(
+                    [page for page in pages if page.page_content.strip()]
+                ),
             )
 
         text = contents.decode("utf-8", errors="replace")
@@ -157,7 +160,26 @@ class DocumentService:
             page_content=text,
             metadata=self._metadata(document),
         )
-        return splitter.split_documents([source])
+        return self._with_chunk_metadata(document, splitter.split_documents([source]))
+
+    @staticmethod
+    def _with_chunk_metadata(
+        document: Document,
+        chunks: list[LangchainDocument],
+    ) -> list[LangchainDocument]:
+        enriched_chunks: list[LangchainDocument] = []
+        for index, chunk in enumerate(chunks):
+            metadata = dict(chunk.metadata)
+            metadata["chunk_id"] = f"{document.id}:{index}"
+            if "start_index" in metadata:
+                metadata["start_index"] = str(metadata["start_index"])
+            enriched_chunks.append(
+                LangchainDocument(
+                    page_content=chunk.page_content,
+                    metadata=metadata,
+                )
+            )
+        return enriched_chunks
 
     @staticmethod
     def _metadata(document: Document, page: int | None = None) -> dict:

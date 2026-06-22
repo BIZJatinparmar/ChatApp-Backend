@@ -3,18 +3,32 @@ import json
 import unittest
 from types import SimpleNamespace
 
+from langchain.messages import HumanMessage
+from langchain_core.documents import Document as LangchainDocument
+from sqlalchemy import create_engine, inspect
+
+from scripts.run_rag_evals import check_expectations, evaluate_case
+
 import app.models.budget_request  # noqa: F401
 import app.models.conversation  # noqa: F401
 import app.models.document_model  # noqa: F401
+import app.models.message  # noqa: F401
+import app.models.rag_retrieval_event  # noqa: F401
+import app.models.user  # noqa: F401
 import app.models.user_permission  # noqa: F401
+from app.core.startup import bootstrap_rag_retrieval_event_schema
+from app.models.base import Base
 from app.schemas.chat import ChatMode, ModelList, Role, StreamMessageRequest
+from app.services.chat.document_context import ChatDocumentContext
 from app.services.chat.ndjson import to_ndjson
 from app.services.chat.prompt_builder import ChatPromptBuilder
 from app.services.chat.route_planner import ChatRoutePlanner
 from app.services.chat.tokens import parse_usage
+from app.services.chat.types import QueryRewriteStructure
 from app.services.chat_stream_service import ChatStreamService
 from app.services.conversation_service import ConversationService
 from app.services.document_service import DocumentService
+from app.services.rag_service import RagService
 
 
 def make_state(
@@ -31,7 +45,20 @@ def make_state(
         "route": "needs_router",
         "route_reason": "",
         "route_confidence": "low",
+        "original_query": user_content,
         "retrieval_query": user_content,
+        "rewrite_used": False,
+        "rewrite_source": "none",
+        "rewrite_confidence": "low",
+        "initial_k": 0,
+        "final_k": 0,
+        "retrieval_confidence": "low",
+        "retrieved_chunk_count": 0,
+        "selected_chunk_count": 0,
+        "retrieved_document_ids": [],
+        "selected_context": [],
+        "fallback_reason": None,
+        "retrieval_latency_ms": 0,
         "rag_docs": [],
         "context": [],
         "answer_kind": "general",
@@ -76,6 +103,43 @@ class ChatHelperTests(unittest.TestCase):
         )
 
 
+class RagSchemaTests(unittest.TestCase):
+    def test_bootstrap_creates_rag_retrieval_events_table(self):
+        engine = create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(bind=engine)
+
+        bootstrap_rag_retrieval_event_schema(engine)
+
+        inspector = inspect(engine)
+        self.assertIn("rag_retrieval_events", inspector.get_table_names())
+        columns = {column["name"] for column in inspector.get_columns("rag_retrieval_events")}
+        self.assertIn("rewritten_query", columns)
+        self.assertIn("selected_context", columns)
+
+
+class FakeStructuredInvoker:
+    def __init__(self, response=None, should_raise=False):
+        self.response = response
+        self.should_raise = should_raise
+
+    def invoke(self, messages):
+        if self.should_raise:
+            raise RuntimeError("rewrite failed")
+        return {"parsed": self.response, "raw": None, "parsing_error": None}
+
+
+class FakeRewriteLlm:
+    def __init__(self, response=None, should_raise=False):
+        self.response = response
+        self.should_raise = should_raise
+
+    def with_structured_output(self, *args, **kwargs):
+        return FakeStructuredInvoker(self.response, self.should_raise)
+
+    def get_num_tokens(self, text):
+        return len(text.split())
+
+
 class ChatRoutePlannerTests(unittest.TestCase):
     def test_fast_route_respects_general_only_mode(self):
         planner = ChatRoutePlanner(lambda user: 5)
@@ -118,6 +182,58 @@ class ChatRoutePlannerTests(unittest.TestCase):
 
         self.assertEqual(result["route"], "needs_router")
         self.assertEqual(result["route_confidence"], "low")
+
+    def test_plan_retrieval_uses_llm_rewrite_for_document_route(self):
+        planner = ChatRoutePlanner(
+            lambda user: 1,
+            llm_factory=lambda model, temperature: FakeRewriteLlm(
+                QueryRewriteStructure(
+                    rewritten_query="What does the contract say about termination?",
+                    confidence="high",
+                    reasoning="Resolved follow-up from chat history.",
+                )
+            ),
+        )
+
+        result = planner.plan_retrieval(
+            make_state(
+                "what about termination?",
+                ChatMode.document_only,
+                route="document_question",
+                route_reason="User selected document-only mode.",
+            )
+        )
+
+        self.assertEqual(
+            result["retrieval_query"],
+            "What does the contract say about termination?",
+        )
+        self.assertTrue(result["rewrite_used"])
+        self.assertEqual(result["rewrite_source"], "llm")
+        self.assertEqual(result["rewrite_confidence"], "high")
+        self.assertEqual(result["initial_k"], 40)
+
+    def test_plan_retrieval_uses_heuristic_when_llm_rewrite_fails(self):
+        planner = ChatRoutePlanner(
+            lambda user: 1,
+            llm_factory=lambda model, temperature: FakeRewriteLlm(should_raise=True),
+        )
+
+        result = planner.plan_retrieval(
+            make_state(
+                "what about termination?",
+                ChatMode.auto,
+                route="document_question",
+                route_reason="Message contains document-reference keywords.",
+                history=[HumanMessage(content="We were discussing the vendor agreement.")],
+            )
+        )
+
+        self.assertIn("what about termination?", result["retrieval_query"])
+        self.assertIn("vendor agreement", result["retrieval_query"])
+        self.assertTrue(result["rewrite_used"])
+        self.assertEqual(result["rewrite_source"], "heuristic")
+        self.assertEqual(result["initial_k"], 30)
 
 
 class ChatPromptBuilderTests(unittest.TestCase):
@@ -208,6 +324,253 @@ class DocumentServiceTests(unittest.TestCase):
 
         self.assertEqual(metadata["page"], "1")
 
+    def test_chunk_metadata_adds_stable_chunk_id_and_start_index(self):
+        document = SimpleNamespace(id="doc-1")
+        chunks = [
+            LangchainDocument(
+                page_content="First chunk",
+                metadata={"document_id": "doc-1", "start_index": 12},
+            )
+        ]
+
+        result = DocumentService._with_chunk_metadata(document, chunks)
+
+        self.assertEqual(result[0].metadata["chunk_id"], "doc-1:0")
+        self.assertEqual(result[0].metadata["start_index"], "12")
+
+
+class FakeVectorStore:
+    def __init__(self, results):
+        self.results = results
+        self.calls = []
+
+    def similarity_search_with_score(self, query, k, filter):
+        self.calls.append({"query": query, "k": k, "filter": filter})
+        return self.results[:k]
+
+
+class RagServiceTests(unittest.TestCase):
+    def test_ranked_context_uses_owner_filter_and_dedupes_chunks(self):
+        docs = [
+            (
+                LangchainDocument(
+                    page_content="Termination requires 30 days notice.",
+                    metadata={
+                        "document_id": "doc-1",
+                        "filename": "contract.pdf",
+                        "page": "2",
+                        "chunk_id": "doc-1:1",
+                    },
+                ),
+                0.2,
+            ),
+            (
+                LangchainDocument(
+                    page_content="Termination requires 30 days notice.",
+                    metadata={
+                        "document_id": "doc-1",
+                        "filename": "contract.pdf",
+                        "page": "2",
+                        "chunk_id": "doc-1:1",
+                    },
+                ),
+                0.21,
+            ),
+            (
+                LangchainDocument(
+                    page_content="Payment is due in 15 days.",
+                    metadata={
+                        "document_id": "doc-1",
+                        "filename": "contract.pdf",
+                        "page": "3",
+                        "chunk_id": "doc-1:2",
+                    },
+                ),
+                0.3,
+            ),
+        ]
+        vector_store = FakeVectorStore(docs)
+        service = RagService(vector_store)
+
+        result = service.get_ranked_context_result(
+            "What does the contract say about termination?",
+            SimpleNamespace(id="user-1"),
+            initial_k=10,
+            final_k=8,
+        )
+
+        self.assertEqual(vector_store.calls[0]["filter"], {"owner_id": "user-1"})
+        self.assertEqual(len(result.retrieved_docs), 3)
+        self.assertEqual(len(result.selected_docs), 2)
+        self.assertEqual(result.retrieval_confidence, "high")
+        self.assertEqual(result.retrieved_document_ids, ["doc-1"])
+        self.assertEqual(result.selected_context[0]["chunk_id"], "doc-1:1")
+
+    def test_document_context_low_confidence_triggers_no_context(self):
+        vector_store = FakeVectorStore([])
+        context = ChatDocumentContext.__new__(ChatDocumentContext)
+        context.db = None
+        context.rag_service = RagService(vector_store)
+
+        result = context.retrieve_documents(
+            make_state(
+                "missing answer",
+                route="document_question",
+                available_document_count=1,
+                initial_k=20,
+                final_k=8,
+            )
+        )
+
+        self.assertTrue(result["retrieval_used"])
+        self.assertTrue(result["no_document_context"])
+        self.assertEqual(result["retrieval_confidence"], "low")
+        self.assertEqual(result["fallback_reason"], "no_retrieval_results")
+
+
+class FakeEvalDocumentContext:
+    def __init__(self):
+        self.queries = []
+
+    def available_document_count(self, user):
+        return 1
+
+    def retrieve_documents(self, state):
+        self.queries.append(state["retrieval_query"])
+        return {
+            "rag_docs": [],
+            "context": [
+                {
+                    "document_id": "doc-1",
+                    "src": "contract.pdf",
+                    "page": "2",
+                    "text": "Vendor agreement termination requires 30 days notice.",
+                }
+            ],
+            "retrieval_used": True,
+            "no_document_context": False,
+            "retrieval_confidence": "high",
+            "retrieved_chunk_count": 1,
+            "selected_chunk_count": 1,
+            "retrieved_document_ids": ["doc-1"],
+            "selected_context": [
+                {
+                    "document_id": "doc-1",
+                    "chunk_id": "doc-1:1",
+                    "filename": "contract.pdf",
+                    "page": "2",
+                    "quote": "Vendor agreement termination requires 30 days notice.",
+                    "rank": 1,
+                    "score": 0.2,
+                }
+            ],
+            "fallback_reason": None,
+            "retrieval_latency_ms": 1,
+        }
+
+
+class RagEvalRunnerTests(unittest.TestCase):
+    def test_eval_case_requires_user_content(self):
+        result = evaluate_case(
+            case={"name": "legacy_case", "query": "direct vector query", "expected": {}},
+            defaults={},
+            route_planner=ChatRoutePlanner(lambda user: 1),
+            document_context=FakeEvalDocumentContext(),
+            default_user_id="user-1",
+        )
+
+        self.assertFalse(result.passed)
+        self.assertEqual(result.failures[0].check, "user_content")
+
+    def test_query_expectation_failures_are_reported(self):
+        state = make_state(
+            "What about resources?",
+            route="general_chat",
+            route_confidence="low",
+            retrieval_query="Tata resource allocation",
+            rewrite_source="none",
+            rewrite_confidence="low",
+            retrieval_confidence="medium",
+            context=[{"text": "Lead Gen AI Engineer"}],
+        )
+
+        failures = check_expectations(
+            expected={
+                "route": "document_question",
+                "rewrite_source": "llm",
+                "min_rewrite_confidence": "medium",
+                "generated_query_terms_all": ["Tata", "timeline"],
+                "generated_query_forbidden_terms_any": ["allocation"],
+            },
+            state=state,
+            selected_doc_ids=[],
+            retrieved_doc_ids=[],
+            selected_pages_=[],
+            selected_text="Lead Gen AI Engineer",
+        )
+
+        self.assertEqual(
+            {failure.check for failure in failures},
+            {
+                "route",
+                "rewrite_source",
+                "min_rewrite_confidence",
+                "generated_query_terms_all",
+                "generated_query_forbidden_terms_any",
+            },
+        )
+
+    def test_eval_runs_rewrite_before_retrieval(self):
+        document_context = FakeEvalDocumentContext()
+        planner = ChatRoutePlanner(
+            document_context.available_document_count,
+            llm_factory=lambda model, temperature: FakeRewriteLlm(
+                QueryRewriteStructure(
+                    rewritten_query="Vendor agreement termination notice",
+                    confidence="high",
+                    reasoning="Resolved follow-up from chat history.",
+                )
+            ),
+        )
+
+        result = evaluate_case(
+            case={
+                "name": "termination_followup",
+                "chat_mode": "document_only",
+                "history": [
+                    {
+                        "role": "user",
+                        "content": "Summarize the vendor agreement.",
+                    },
+                    {
+                        "role": "assistant",
+                        "content": "It covers payment and termination clauses.",
+                    },
+                ],
+                "user_content": "What about termination?",
+                "expected": {
+                    "route": "document_question",
+                    "rewrite_source": "llm",
+                    "min_rewrite_confidence": "high",
+                    "generated_query_terms_all": ["Vendor agreement", "termination"],
+                    "selected_document_ids_any": ["doc-1"],
+                    "selected_pages_any": ["2"],
+                    "required_terms_all": ["30 days notice"],
+                    "min_confidence": "high",
+                    "fallback_reason": None,
+                },
+            },
+            defaults={},
+            route_planner=planner,
+            document_context=document_context,
+            default_user_id="user-1",
+        )
+
+        self.assertTrue(result.passed, result.failures)
+        self.assertEqual(document_context.queries, ["Vendor agreement termination notice"])
+        self.assertEqual(result.summary["user_content"], "What about termination?")
+        self.assertEqual(result.summary["retrieval_query"], "Vendor agreement termination notice")
+
 
 class FakeMessageRepository:
     def __init__(self):
@@ -253,6 +616,10 @@ class FakeDb:
     def __init__(self):
         self.committed = False
         self.rolled_back = False
+        self.added = []
+
+    def add(self, item):
+        self.added.append(item)
 
     def commit(self):
         self.committed = True
@@ -307,7 +674,13 @@ class ChatStreamServiceTests(unittest.TestCase):
             "route_confidence": "high",
             "router_used": False,
             "retrieval_used": False,
+            "original_query": "hello",
             "retrieval_query": "hello",
+            "rewrite_used": False,
+            "rewrite_source": "none",
+            "rewrite_confidence": "low",
+            "retrieval_confidence": "low",
+            "fallback_reason": None,
             "answer_kind": "general",
         }
         service = self.build_service(
@@ -370,7 +743,13 @@ class ChatStreamServiceTests(unittest.TestCase):
             "route_confidence": "high",
             "router_used": False,
             "retrieval_used": False,
+            "original_query": "hello",
             "retrieval_query": "hello",
+            "rewrite_used": False,
+            "rewrite_source": "none",
+            "rewrite_confidence": "low",
+            "retrieval_confidence": "low",
+            "fallback_reason": None,
             "answer_kind": "general",
         }
         service = self.build_service(graph_state, FakeModel([RuntimeError("boom")]))

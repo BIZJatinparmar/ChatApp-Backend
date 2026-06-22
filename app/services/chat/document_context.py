@@ -1,3 +1,5 @@
+from time import perf_counter
+
 from sqlalchemy.orm import Session
 
 from app.core.database import get_vector_db
@@ -30,17 +32,29 @@ class ChatDocumentContext:
                 "context": [],
                 "retrieval_used": False,
                 "no_document_context": True,
+                "fallback_reason": "no_ready_documents",
             }
 
-        docs = self.rag_service.get_ranked_context(
+        started_at = perf_counter()
+        result = self.rag_service.get_ranked_context_result(
             state["retrieval_query"],
             state["user"],
-            initial_k=20,
-            final_k=8,
+            initial_k=state["initial_k"] or 20,
+            final_k=state["final_k"] or 8,
         )
+        latency_ms = int((perf_counter() - started_at) * 1000)
+        no_document_context = result.retrieval_confidence == "low"
+        docs = [] if no_document_context else result.selected_docs
         return {
             "rag_docs": docs,
             "context": format_context(docs),
             "retrieval_used": True,
-            "no_document_context": len(docs) == 0,
+            "no_document_context": no_document_context,
+            "retrieval_confidence": result.retrieval_confidence,
+            "retrieved_chunk_count": len(result.retrieved_docs),
+            "selected_chunk_count": len(result.selected_docs),
+            "retrieved_document_ids": result.retrieved_document_ids,
+            "selected_context": result.selected_context,
+            "fallback_reason": result.fallback_reason,
+            "retrieval_latency_ms": latency_ms,
         }
