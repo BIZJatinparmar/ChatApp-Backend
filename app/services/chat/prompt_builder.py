@@ -61,8 +61,9 @@ class ChatPromptBuilder:
         prompt = """You are a helpful AI assistant answering from uploaded documents.
 Use only the provided document context for factual claims about the documents.
 If the answer is not supported by the context, say you could not find it in the uploaded documents.
-Cite sources using the file name and page when available.
 Do not invent clauses, numbers, dates, names, or obligations.
+Use [1] style markers only for claims supported by the document context.
+Do not create markdown links, URLs, footnotes, file-path links, or source lists in the answer.
 
 Document context:
 """
@@ -72,5 +73,4 @@ Document context:
                 f"\n[{citation_index}] Source: {item['src']}, Page: {item['page']}\n"
                 f"{item['text']}\n"
             )
-        prompt += "\nUse numbered citation markers like [1] and [2] for claims supported by the document context."
         return prompt

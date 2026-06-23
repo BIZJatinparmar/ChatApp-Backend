@@ -1,0 +1,1178 @@
+{
+  "passed": 1,
+  "total": 9,
+  "results": [
+    {
+      "name": "nippon_followup_resource_allocation",
+      "passed": false,
+      "failures": [
+        {
+          "check": "selected_pages_any",
+          "expected": [
+            "10"
+          ],
+          "actual": [
+            "1",
+            "3",
+            "11",
+            "5",
+            "4"
+          ]
+        },
+        {
+          "check": "required_terms_all",
+          "expected": "Resource Allocation",
+          "actual": "not found"
+        },
+        {
+          "check": "required_terms_all",
+          "expected": "Lead Gen AI Engineer",
+          "actual": "not found"
+        },
+        {
+          "check": "required_terms_all",
+          "expected": "Senior Gen-AI Engineer",
+          "actual": "not found"
+        },
+        {
+          "check": "required_terms_all",
+          "expected": "PMO",
+          "actual": "not found"
+        }
+      ],
+      "user_content": "What is the resource allocation?",
+      "user_id": "170a4024-1c07-4724-9412-a642172aad43",
+      "chat_mode": "document_only",
+      "history_count": 2,
+      "route": "document_question",
+      "route_reason": "User selected document-only mode.",
+      "route_confidence": "high",
+      "router_used": false,
+      "original_query": "What is the resource allocation?",
+      "retrieval_query": "Nippon Life enterprise agentic AI platform SOW resource allocation",
+      "rewrite_used": true,
+      "rewrite_source": "llm",
+      "rewrite_confidence": "high",
+      "initial_k": 40,
+      "final_k": 8,
+      "retrieval_used": true,
+      "retrieval_confidence": "high",
+      "fallback_reason": null,
+      "retrieved_chunk_count": 40,
+      "selected_chunk_count": 8,
+      "retrieved_document_ids": [
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+        "863222c2-7298-4049-9b9a-6e566c37414b",
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+        "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99"
+      ],
+      "selected_document_ids": [
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+        "863222c2-7298-4049-9b9a-6e566c37414b",
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15"
+      ],
+      "selected_pages": [
+        "1",
+        "3",
+        "11",
+        "5",
+        "4"
+      ],
+      "selected_context": [
+        {
+          "document_id": "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+          "chunk_id": null,
+          "filename": "Bizmetric - Nippon_SOW_BOT.pdf",
+          "page": "1",
+          "quote": "Statement of Work (SOW) for Nippon Life   Version \u2013 1.0 | 23-03-2026    Enterprise Agentic AI Platform for Intelligent Agent Operations & Automation        Abstract  This Statement of Work (SOW) defines the scope, timeline,  methodology, key activities, and expected deliverables for a  project to be",
+          "rank": 1,
+          "score": 0.33045932548604007
+        },
+        {
+          "document_id": "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+          "chunk_id": null,
+          "filename": "Bizmetric - Nippon_SOW_BOT.pdf",
+          "page": "3",
+          "quote": "Enterprise Agentic AI Platform for Intelligent Agent Operations & Automation  1. Project Overview  This engagement focuses on building an enterprise-grade conversational AI platform that combines:  \u2022 Retrieval-Augmented Generation (RAG) for accurate, citation-backed knowledge retrieval  \u2022 Agentic or",
+          "rank": 2,
+          "score": 0.4526800306095191
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "11",
+          "quote": "IntelAct 2.0 \u2013 Key Focus Areas Platform Modernization \u2022 Strong Agentic AI, modular  architecture \u2022 Generative AI studio (LCNC,  Pro code) \u2022 Rapid development and  onboarding of latest LLMs \u2022 Cost optimisation for  seasonal and regular use- cases Productivity & Experience \u2022 Unified multi-channel  exp",
+          "rank": 3,
+          "score": 0.4706602925561726
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "11",
+          "quote": "AI Agents Multi agent system implementation Functional & scalable  White Space Engine Gap analysis module Actionable insights generated  Reporting Engine AI generated reports Executive ready quality  Deployment Azure deployment Stable & secure",
+          "rank": 4,
+          "score": 0.48876139668015983
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "5",
+          "quote": "\u25aa Leveraged for decision making  Opportunity Identified  The key opportunity lies in transforming the existing portal into an AI powered innovation intelligence  system  Key strengths already available:  \u2022 Structured SQL backend  \u2022 Programmatic access to all data  \u2022 Rich historical dataset  \u2022 Cross ",
+          "rank": 5,
+          "score": 0.49183723426695203
+        },
+        {
+          "document_id": "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+          "chunk_id": null,
+          "filename": "Bizmetric - Nippon_SOW_BOT.pdf",
+          "page": "3",
+          "quote": "2. Business Objective:  The organization aims to modernize agent operations by introducing an AI-powered assistant that:  \u2022 Reduces dependency on manual knowledge lookup  \u2022 Enables agents to execute transactions directly through conversational interfaces  \u2022 Improves response time and decision accura",
+          "rank": 6,
+          "score": 0.49217804739428384
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "3",
+          "quote": "The system will function as a single intelligent assistant, powered by an underlying agentic architecture,  delivering end-to-end research and decision support.  2. Business Objective:  The objective is to enable data-driven RAG solution:  \u2022 NLQ based 360-degree view of innovation landscape (interna",
+          "rank": 7,
+          "score": 0.49269534221186007
+        },
+        {
+          "document_id": "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+          "chunk_id": null,
+          "filename": "Bizmetric - Nippon_SOW_BOT.pdf",
+          "page": "4",
+          "quote": "3. Project Understanding  The client intends to implement an enterprise-grade Agentic AI chatbot platform that goes beyond  traditional conversational systems by combining:  \u2022 Retrieval-Augmented Generation (RAG)  \u25aa To provide accurate, grounded, and citation-backed responses from internal knowledge",
+          "rank": 8,
+          "score": 0.4986251753690709
+        }
+      ]
+    },
+    {
+      "name": "nippon_followup_azure_architecture",
+      "passed": false,
+      "failures": [
+        {
+          "check": "required_terms_all",
+          "expected": "Azure Static Web Apps",
+          "actual": "not found"
+        }
+      ],
+      "user_content": "Which Azure components are proposed for security, frontend, API, storage, monitoring, and AI?",
+      "user_id": "170a4024-1c07-4724-9412-a642172aad43",
+      "chat_mode": "document_only",
+      "history_count": 2,
+      "route": "document_question",
+      "route_reason": "User selected document-only mode.",
+      "route_confidence": "high",
+      "router_used": false,
+      "original_query": "Which Azure components are proposed for security, frontend, API, storage, monitoring, and AI?",
+      "retrieval_query": "Nippon Life SOW agentic AI chatbot platform: which Azure components are proposed for security, frontend, API, storage, monitoring, and AI",
+      "rewrite_used": true,
+      "rewrite_source": "llm",
+      "rewrite_confidence": "high",
+      "initial_k": 40,
+      "final_k": 8,
+      "retrieval_used": true,
+      "retrieval_confidence": "high",
+      "fallback_reason": null,
+      "retrieved_chunk_count": 40,
+      "selected_chunk_count": 8,
+      "retrieved_document_ids": [
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+        "863222c2-7298-4049-9b9a-6e566c37414b",
+        "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99"
+      ],
+      "selected_document_ids": [
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+        "863222c2-7298-4049-9b9a-6e566c37414b"
+      ],
+      "selected_pages": [
+        "1",
+        "6",
+        "9",
+        "3",
+        "10",
+        "5",
+        "8",
+        "11"
+      ],
+      "selected_context": [
+        {
+          "document_id": "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+          "chunk_id": null,
+          "filename": "Bizmetric - Nippon_SOW_BOT.pdf",
+          "page": "1",
+          "quote": "Statement of Work (SOW) for Nippon Life   Version \u2013 1.0 | 23-03-2026    Enterprise Agentic AI Platform for Intelligent Agent Operations & Automation        Abstract  This Statement of Work (SOW) defines the scope, timeline,  methodology, key activities, and expected deliverables for a  project to be",
+          "rank": 1,
+          "score": 0.3124927439108329
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "6",
+          "quote": "structured insights  External Intelligence Agent Azure OpenAI + External  APIs  Gathers and summarizes global innovation trends  and benchmarks  Patent Intelligence Agent Azure OpenAI + Patent APIs Performs patent search, similarity analysis, and risk  assessment  White Space Analysis Agent Azure Op",
+          "rank": 2,
+          "score": 0.3808383993859086
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "9",
+          "quote": "IntelAct 1.0 - Deployment Architecture Internal Users  App service plan Azure App  Services internet Azure APIM WAF Azure App  Service chatcompletion speechtotext Azure Devops azureparser documentsummarizer Frontend Middleware Blob Storage Azure SQL DB Database, Storage Azure Cognitive  Service Azur",
+          "rank": 3,
+          "score": 0.39228083581026896
+        },
+        {
+          "document_id": "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+          "chunk_id": null,
+          "filename": "Bizmetric - Nippon_SOW_BOT.pdf",
+          "page": "3",
+          "quote": "Enterprise Agentic AI Platform for Intelligent Agent Operations & Automation  1. Project Overview  This engagement focuses on building an enterprise-grade conversational AI platform that combines:  \u2022 Retrieval-Augmented Generation (RAG) for accurate, citation-backed knowledge retrieval  \u2022 Agentic or",
+          "rank": 4,
+          "score": 0.40375056610879567
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "10",
+          "quote": "IntelAct 1.0 - Migration to AKS (Current) Container  Registry Docker  Container Docker  Push/Pull CI/CD Pipelines User Load  Balancer Ingress  Controller (Port  80/443) WAF Kubernetes Cluster Worker Nodes  Worker Nodes Cloud Controller  API Server Scheduler  Control  Manager Master Nodes Worker Node",
+          "rank": 5,
+          "score": 0.40453199915747906
+        },
+        {
+          "document_id": "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+          "chunk_id": null,
+          "filename": "Bizmetric - Nippon_SOW_BOT.pdf",
+          "page": "5",
+          "quote": "4. Technical Solution Architecture      5. Architecture Components  Below is the High-Level Architecture Components table for the proposed Solution.  Component Technology Purpose  Web Application  Firewall Azure WAF Protects the application from OWASP threats (SQL injection,  XSS), ensures secure ex",
+          "rank": 6,
+          "score": 0.41447500144603944
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "8",
+          "quote": "Patent Intelligence  \u2022 Integrate with patent systems/APIs  \u2022 Perform similarity and overlap analysis  \u2022 Generate patent risk and novelty scores  White Space Analysis  \u2022 Compare internal vs external insights  \u2022 Identify gaps and opportunity areas  \u2022 Generate innovation opportunity clusters  Report Ge",
+          "rank": 7,
+          "score": 0.41731650839072354
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "11",
+          "quote": "AI Agents Multi agent system implementation Functional & scalable  White Space Engine Gap analysis module Actionable insights generated  Reporting Engine AI generated reports Executive ready quality  Deployment Azure deployment Stable & secure",
+          "rank": 8,
+          "score": 0.4200580837015203
+        }
+      ]
+    },
+    {
+      "name": "tata_followup_deep_research_objective",
+      "passed": false,
+      "failures": [
+        {
+          "check": "generated_query_terms_any",
+          "expected": [
+            "innovation",
+            "patent",
+            "white space"
+          ],
+          "actual": "Tata Sons Deep Research AI RAG SOW main project objective and system inputs"
+        }
+      ],
+      "user_content": "What is the main project objective and what inputs does the system use?",
+      "user_id": "170a4024-1c07-4724-9412-a642172aad43",
+      "chat_mode": "document_only",
+      "history_count": 2,
+      "route": "document_question",
+      "route_reason": "User selected document-only mode.",
+      "route_confidence": "high",
+      "router_used": false,
+      "original_query": "What is the main project objective and what inputs does the system use?",
+      "retrieval_query": "Tata Sons Deep Research AI RAG SOW main project objective and system inputs",
+      "rewrite_used": true,
+      "rewrite_source": "llm",
+      "rewrite_confidence": "high",
+      "initial_k": 40,
+      "final_k": 8,
+      "retrieval_used": true,
+      "retrieval_confidence": "high",
+      "fallback_reason": null,
+      "retrieved_chunk_count": 40,
+      "selected_chunk_count": 8,
+      "retrieved_document_ids": [
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+        "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+        "863222c2-7298-4049-9b9a-6e566c37414b"
+      ],
+      "selected_document_ids": [
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d"
+      ],
+      "selected_pages": [
+        "3",
+        "1",
+        "5",
+        "6",
+        "10",
+        "4"
+      ],
+      "selected_context": [
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "3",
+          "quote": "Deep Research AI RAG for Innovation Intelligence & Strategic Decision Support  1. Project Overview  Tata Group aims to build a greenfield AI-powered innovation intelligence RAG capability on top of its  existing innovation portal. The current system contains rich, structured innovation data but lack",
+          "rank": 1,
+          "score": 0.2636489995435052
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "1",
+          "quote": "Statement of Work (SOW) for Tata Sons   Version \u2013 1.1 | 23-03-2026    Deep Research AI Platform for Innovation Intelligence & Strategic Decision  Support        Abstract  This Statement of Work (SOW) defines the POC scope,  timeline, methodology, key activities, and expected  deliverables for a proj",
+          "rank": 2,
+          "score": 0.3780145331729694
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "3",
+          "quote": "The system will function as a single intelligent assistant, powered by an underlying agentic architecture,  delivering end-to-end research and decision support.  2. Business Objective:  The objective is to enable data-driven RAG solution:  \u2022 NLQ based 360-degree view of innovation landscape (interna",
+          "rank": 3,
+          "score": 0.4273541587588885
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "5",
+          "quote": "\u25aa Leveraged for decision making  Opportunity Identified  The key opportunity lies in transforming the existing portal into an AI powered innovation intelligence  system  Key strengths already available:  \u2022 Structured SQL backend  \u2022 Programmatic access to all data  \u2022 Rich historical dataset  \u2022 Cross ",
+          "rank": 4,
+          "score": 0.4732118187128349
+        },
+        {
+          "document_id": "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+          "chunk_id": null,
+          "filename": "Bizmetric - Nippon_SOW_BOT.pdf",
+          "page": "6",
+          "quote": "memory for personalization  Compute AKS Orchestration of Dockerized containers  Container Registry Azure Container  Registry For registration of Dockerized containers images  6. Project Scope of Work  The scope of this engagement includes the design, development, deployment, and testing of an AI- po",
+          "rank": 5,
+          "score": 0.47865077728531114
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "10",
+          "quote": "\u25aa Evaluation time reduction  \u25aa Accuracy of insights  \u25aa System usage  \u2022 Establish governance framework for AI outputs  7. Detailed Approach  Stage 1: Discovery & Planning  \u2022 Understand portal schema and data structure  \u2022 Identify key innovation attributes  \u2022 Finalize architecture and agent design  St",
+          "rank": 6,
+          "score": 0.5022829877818153
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "4",
+          "quote": "3. Project Understanding  Tata Group has an established internal innovation management portal that has been in use for several  years. While the platform was originally designed for a different purpose, it contains rich, structured  historical and ongoing innovation data across business units.  Curr",
+          "rank": 7,
+          "score": 0.5071802908906519
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "10",
+          "quote": "\u25aa Searches for patent databases  \u25aa Identifies overlaps and risks  \u2022 White Space Analysis   \u25aa Compares internal vs external insights  \u25aa Identify innovation gaps  \u2022 Strategic Report Generation Agent  \u25aa Generates executive summaries using LLM  \u25aa Provides recommendations and scoring  Stage 4: AI/ML & LL",
+          "rank": 8,
+          "score": 0.5118396784233137
+        }
+      ]
+    },
+    {
+      "name": "tata_followup_resource_allocation",
+      "passed": false,
+      "failures": [
+        {
+          "check": "selected_pages_any",
+          "expected": [
+            "12"
+          ],
+          "actual": [
+            "3",
+            "1",
+            "5",
+            "14",
+            "10",
+            "4"
+          ]
+        },
+        {
+          "check": "required_terms_all",
+          "expected": "Timeline total weeks",
+          "actual": "not found"
+        },
+        {
+          "check": "required_terms_all",
+          "expected": "Agent Development",
+          "actual": "not found"
+        },
+        {
+          "check": "required_terms_all",
+          "expected": "Lead Gen AI Engineer",
+          "actual": "not found"
+        }
+      ],
+      "user_content": "What is the timeline and resource allocation?",
+      "user_id": "170a4024-1c07-4724-9412-a642172aad43",
+      "chat_mode": "document_only",
+      "history_count": 2,
+      "route": "document_question",
+      "route_reason": "User selected document-only mode.",
+      "route_confidence": "high",
+      "router_used": false,
+      "original_query": "What is the timeline and resource allocation?",
+      "retrieval_query": "Tata Sons Deep Research AI RAG SOW timeline and resource allocation",
+      "rewrite_used": true,
+      "rewrite_source": "llm",
+      "rewrite_confidence": "high",
+      "initial_k": 40,
+      "final_k": 8,
+      "retrieval_used": true,
+      "retrieval_confidence": "high",
+      "fallback_reason": null,
+      "retrieved_chunk_count": 40,
+      "selected_chunk_count": 8,
+      "retrieved_document_ids": [
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+        "863222c2-7298-4049-9b9a-6e566c37414b",
+        "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99"
+      ],
+      "selected_document_ids": [
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15"
+      ],
+      "selected_pages": [
+        "3",
+        "1",
+        "5",
+        "14",
+        "10",
+        "4"
+      ],
+      "selected_context": [
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "3",
+          "quote": "Deep Research AI RAG for Innovation Intelligence & Strategic Decision Support  1. Project Overview  Tata Group aims to build a greenfield AI-powered innovation intelligence RAG capability on top of its  existing innovation portal. The current system contains rich, structured innovation data but lack",
+          "rank": 1,
+          "score": 0.33067695254712925
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "1",
+          "quote": "Statement of Work (SOW) for Tata Sons   Version \u2013 1.1 | 23-03-2026    Deep Research AI Platform for Innovation Intelligence & Strategic Decision  Support        Abstract  This Statement of Work (SOW) defines the POC scope,  timeline, methodology, key activities, and expected  deliverables for a proj",
+          "rank": 2,
+          "score": 0.38340469603083527
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "3",
+          "quote": "The system will function as a single intelligent assistant, powered by an underlying agentic architecture,  delivering end-to-end research and decision support.  2. Business Objective:  The objective is to enable data-driven RAG solution:  \u2022 NLQ based 360-degree view of innovation landscape (interna",
+          "rank": 3,
+          "score": 0.48790143612605497
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "5",
+          "quote": "\u25aa Leveraged for decision making  Opportunity Identified  The key opportunity lies in transforming the existing portal into an AI powered innovation intelligence  system  Key strengths already available:  \u2022 Structured SQL backend  \u2022 Programmatic access to all data  \u2022 Rich historical dataset  \u2022 Cross ",
+          "rank": 4,
+          "score": 0.4983483687666773
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "14",
+          "quote": "AI +  Machine  Learning  Azure OpenAI South  India  Language Models, GPT-4o-128K, Standard  (On-Demand), Global, 1,000 x 1,000 input  tokens, 1,000 x 1,000 output tokens  $20.00  Databases  Azure  Databasefor  PostgreSQL  Central  India  Flexible Server Deployment, General  Purpose Tier, 1 D8ds v5 (",
+          "rank": 5,
+          "score": 0.4984082511534633
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "10",
+          "quote": "\u25aa Evaluation time reduction  \u25aa Accuracy of insights  \u25aa System usage  \u2022 Establish governance framework for AI outputs  7. Detailed Approach  Stage 1: Discovery & Planning  \u2022 Understand portal schema and data structure  \u2022 Identify key innovation attributes  \u2022 Finalize architecture and agent design  St",
+          "rank": 6,
+          "score": 0.5119270341595907
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "4",
+          "quote": "3. Project Understanding  Tata Group has an established internal innovation management portal that has been in use for several  years. While the platform was originally designed for a different purpose, it contains rich, structured  historical and ongoing innovation data across business units.  Curr",
+          "rank": 7,
+          "score": 0.5176051953126308
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "10",
+          "quote": "\u25aa Searches for patent databases  \u25aa Identifies overlaps and risks  \u2022 White Space Analysis   \u25aa Compares internal vs external insights  \u25aa Identify innovation gaps  \u2022 Strategic Report Generation Agent  \u25aa Generates executive summaries using LLM  \u25aa Provides recommendations and scoring  Stage 4: AI/ML & LL",
+          "rank": 8,
+          "score": 0.5208860005940499
+        }
+      ]
+    },
+    {
+      "name": "abg_followup_platform_capabilities",
+      "passed": false,
+      "failures": [
+        {
+          "check": "required_terms_all",
+          "expected": "Agent creation studio",
+          "actual": "not found"
+        },
+        {
+          "check": "required_terms_all",
+          "expected": "50,000+ Users",
+          "actual": "not found"
+        }
+      ],
+      "user_content": "What capabilities, channels, security posture, and usage statistics are listed?",
+      "user_id": "170a4024-1c07-4724-9412-a642172aad43",
+      "chat_mode": "document_only",
+      "history_count": 2,
+      "route": "document_question",
+      "route_reason": "User selected document-only mode.",
+      "route_confidence": "high",
+      "router_used": false,
+      "original_query": "What capabilities, channels, security posture, and usage statistics are listed?",
+      "retrieval_query": "ABG IntelAct 1.0 Gen AI Platform overview: listed capabilities, channels, security posture, and usage statistics",
+      "rewrite_used": true,
+      "rewrite_source": "llm",
+      "rewrite_confidence": "high",
+      "initial_k": 40,
+      "final_k": 8,
+      "retrieval_used": true,
+      "retrieval_confidence": "high",
+      "fallback_reason": null,
+      "retrieved_chunk_count": 40,
+      "selected_chunk_count": 8,
+      "retrieved_document_ids": [
+        "863222c2-7298-4049-9b9a-6e566c37414b",
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+        "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d"
+      ],
+      "selected_document_ids": [
+        "863222c2-7298-4049-9b9a-6e566c37414b",
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15"
+      ],
+      "selected_pages": [
+        "1",
+        "3",
+        "11",
+        "2",
+        "5",
+        "8",
+        "6",
+        "9"
+      ],
+      "selected_context": [
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "1",
+          "quote": "ABG IntelAct 1.0 Gen AI Platform Overview",
+          "rank": 1,
+          "score": 0.10201281683775099
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "3",
+          "quote": "ABG IntelAct \u2013 ABG\u2019s Generative AI Platform Overview 1. ABG\u2019s Generative AI Platform with \u201cready to use\u201d capabilities for all employees 2. Built on multi-large language models ; is currently enabled with GPT series up to latest 5.2,  Gemini 2.5 pro, diffusion models \u2013 Imagen 4.0 and GPT Image 1.5 & ",
+          "rank": 2,
+          "score": 0.2900848478550313
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "11",
+          "quote": "IntelAct 2.0 \u2013 Key Focus Areas Platform Modernization \u2022 Strong Agentic AI, modular  architecture \u2022 Generative AI studio (LCNC,  Pro code) \u2022 Rapid development and  onboarding of latest LLMs \u2022 Cost optimisation for  seasonal and regular use- cases Productivity & Experience \u2022 Unified multi-channel  exp",
+          "rank": 3,
+          "score": 0.3558557752355064
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "2",
+          "quote": "Table of Contents 1) Introduction 2) Current Challenges 3) Platform Capabilities 4) Use cases 5) Deployment Architecture 6) IntelAct 2.0 Focus Areas",
+          "rank": 4,
+          "score": 0.43095866687988704
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "5",
+          "quote": "Migration scope \u2013Horizontal \u201cReady to use\u201d Productivity capabilities (1/2) Document Insights Assistant Summarise  Compare Write Research Assistant 1. Source and share latest  Information from web 2. Generate Article/  Report/ Insights/  Summary ABG Workforce E.g. - SoWs, Contracts, SOPs, Policies  A",
+          "rank": 5,
+          "score": 0.4318665519004531
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "8",
+          "quote": "IntelAct 1.0 - Current Challenges \u25aa Single user interface (UX) for all types of input data \u25aa Advanced Conversation Intelligence & Personalisation (past conversation history, auto  selection of model, personalization) \u25aa Large Data processing (multi -tab excel, multiple office file types, 50 MB limit)",
+          "rank": 6,
+          "score": 0.4328498188056765
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "6",
+          "quote": "structured insights  External Intelligence Agent Azure OpenAI + External  APIs  Gathers and summarizes global innovation trends  and benchmarks  Patent Intelligence Agent Azure OpenAI + Patent APIs Performs patent search, similarity analysis, and risk  assessment  White Space Analysis Agent Azure Op",
+          "rank": 7,
+          "score": 0.4604401422194754
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "9",
+          "quote": "IntelAct 1.0 - Deployment Architecture Internal Users  App service plan Azure App  Services internet Azure APIM WAF Azure App  Service chatcompletion speechtotext Azure Devops azureparser documentsummarizer Frontend Middleware Blob Storage Azure SQL DB Database, Storage Azure Cognitive  Service Azur",
+          "rank": 8,
+          "score": 0.4609560891036385
+        }
+      ]
+    },
+    {
+      "name": "abg_followup_current_challenges",
+      "passed": false,
+      "failures": [
+        {
+          "check": "generated_query_terms_all",
+          "expected": "current challenges",
+          "actual": "ABG IntelAct 1.0 overview: product challenges, UX challenges, technical challenges, and cost-management challenges"
+        }
+      ],
+      "user_content": "What are the product, UX, technical, and cost-management challenges?",
+      "user_id": "170a4024-1c07-4724-9412-a642172aad43",
+      "chat_mode": "document_only",
+      "history_count": 2,
+      "route": "document_question",
+      "route_reason": "User selected document-only mode.",
+      "route_confidence": "high",
+      "router_used": false,
+      "original_query": "What are the product, UX, technical, and cost-management challenges?",
+      "retrieval_query": "ABG IntelAct 1.0 overview: product challenges, UX challenges, technical challenges, and cost-management challenges",
+      "rewrite_used": true,
+      "rewrite_source": "llm",
+      "rewrite_confidence": "high",
+      "initial_k": 40,
+      "final_k": 8,
+      "retrieval_used": true,
+      "retrieval_confidence": "high",
+      "fallback_reason": null,
+      "retrieved_chunk_count": 40,
+      "selected_chunk_count": 8,
+      "retrieved_document_ids": [
+        "863222c2-7298-4049-9b9a-6e566c37414b",
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+        "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99"
+      ],
+      "selected_document_ids": [
+        "863222c2-7298-4049-9b9a-6e566c37414b"
+      ],
+      "selected_pages": [
+        "1",
+        "3",
+        "8",
+        "11",
+        "5",
+        "2",
+        "13",
+        "6"
+      ],
+      "selected_context": [
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "1",
+          "quote": "ABG IntelAct 1.0 Gen AI Platform Overview",
+          "rank": 1,
+          "score": 0.20745461407181298
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "3",
+          "quote": "ABG IntelAct \u2013 ABG\u2019s Generative AI Platform Overview 1. ABG\u2019s Generative AI Platform with \u201cready to use\u201d capabilities for all employees 2. Built on multi-large language models ; is currently enabled with GPT series up to latest 5.2,  Gemini 2.5 pro, diffusion models \u2013 Imagen 4.0 and GPT Image 1.5 & ",
+          "rank": 2,
+          "score": 0.3856897289739806
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "8",
+          "quote": "IntelAct 1.0 - Current Challenges \u25aa Single user interface (UX) for all types of input data \u25aa Advanced Conversation Intelligence & Personalisation (past conversation history, auto  selection of model, personalization) \u25aa Large Data processing (multi -tab excel, multiple office file types, 50 MB limit)",
+          "rank": 3,
+          "score": 0.44024669829605845
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "11",
+          "quote": "IntelAct 2.0 \u2013 Key Focus Areas Platform Modernization \u2022 Strong Agentic AI, modular  architecture \u2022 Generative AI studio (LCNC,  Pro code) \u2022 Rapid development and  onboarding of latest LLMs \u2022 Cost optimisation for  seasonal and regular use- cases Productivity & Experience \u2022 Unified multi-channel  exp",
+          "rank": 4,
+          "score": 0.4615384277477931
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "5",
+          "quote": "Migration scope \u2013Horizontal \u201cReady to use\u201d Productivity capabilities (1/2) Document Insights Assistant Summarise  Compare Write Research Assistant 1. Source and share latest  Information from web 2. Generate Article/  Report/ Insights/  Summary ABG Workforce E.g. - SoWs, Contracts, SOPs, Policies  A",
+          "rank": 5,
+          "score": 0.4683132508935185
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "2",
+          "quote": "Table of Contents 1) Introduction 2) Current Challenges 3) Platform Capabilities 4) Use cases 5) Deployment Architecture 6) IntelAct 2.0 Focus Areas",
+          "rank": 6,
+          "score": 0.475671213096175
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "13",
+          "quote": "Current Challenges \u2013 Technical (1/2) Rapid development (Custom - RAG, Workbench Studio) Repository data sync \u2013 incremental (Logic Apps) Cost allocation by use cases (Infra, Services, Tokens) Optimal Sizing and Cost reduction Debugging and Troubleshooting",
+          "rank": 7,
+          "score": 0.5043311909177892
+        },
+        {
+          "document_id": "863222c2-7298-4049-9b9a-6e566c37414b",
+          "chunk_id": null,
+          "filename": "ABG_IntelAct_GenAIPlatform_1.0_Overview_ForPartners_v2.pdf",
+          "page": "6",
+          "quote": "Target Users Use Case Stage Market facing SERA \u2013 Virtual Assistant driving conversations on ABG Corporate  Website Live Pan ABG-MDP AI powered My development Plan on Poornata for Goal setting Live Pan ABG-MLT Multilingual Translation: Conversion of yearly evaluation form in 6  different languages to",
+          "rank": 8,
+          "score": 0.5205825109505778
+        }
+      ]
+    },
+    {
+      "name": "wipro_followup_validation_scope",
+      "passed": false,
+      "failures": [
+        {
+          "check": "required_terms_all",
+          "expected": "Three-Way Matching",
+          "actual": "not found"
+        }
+      ],
+      "user_content": "What is included in validation and reconciliation?",
+      "user_id": "170a4024-1c07-4724-9412-a642172aad43",
+      "chat_mode": "document_only",
+      "history_count": 2,
+      "route": "document_question",
+      "route_reason": "User selected document-only mode.",
+      "route_confidence": "high",
+      "router_used": false,
+      "original_query": "What is included in validation and reconciliation?",
+      "retrieval_query": "Wipro AI-powered intelligent invoice processing SOW \u2014 what is included in validation and reconciliation",
+      "rewrite_used": true,
+      "rewrite_source": "llm",
+      "rewrite_confidence": "high",
+      "initial_k": 40,
+      "final_k": 8,
+      "retrieval_used": true,
+      "retrieval_confidence": "high",
+      "fallback_reason": null,
+      "retrieved_chunk_count": 40,
+      "selected_chunk_count": 8,
+      "retrieved_document_ids": [
+        "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+        "863222c2-7298-4049-9b9a-6e566c37414b"
+      ],
+      "selected_document_ids": [
+        "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99"
+      ],
+      "selected_pages": [
+        "1",
+        "3",
+        "4",
+        "9",
+        "12",
+        "6",
+        "10"
+      ],
+      "selected_context": [
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "1",
+          "quote": "Statement of Work (SOW) for Wipro   Version \u2013 1.0 | 11-03-2026    AI-Powered Intelligent Invoice Processing & Workflow Automation        Abstract  This Statement of Work (SOW) defines the scope, timeline,  methodology, key activities, and expected deliverables for a  project to be implemented on Mic",
+          "rank": 1,
+          "score": 0.28231796810008447
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "3",
+          "quote": "2. Validate invoice data against PO, BOQ, and contract information & documents.  3. Enable workflow-based approvals using automated routing.  4. Maintain audit logs and compliance records.  5. Provide real-time analytics dashboards for finance teams.  The implementation will be delivered in three ph",
+          "rank": 2,
+          "score": 0.3246688209258104
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "4",
+          "quote": "The key business objective is to empower WIPRO finance and operations teams with Generative AI-based  solutions to:  \u2022 Reduction in manual processing effort  \u2022 Improved invoice processing accuracy  \u2022 Reduced approval turnaround time  \u2022 Improved auditability and compliance  \u2022 Enhance transparency, go",
+          "rank": 3,
+          "score": 0.3439174669727083
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "9",
+          "quote": "\u2022 Tax calculation verification.  \u2022 Subtotal and total validation  \u2022 Quantity \u00d7 unit price validation  4. Duplicate Invoice Detection  Identify duplicate invoices using:  \u2022 Invoice number  \u2022 Vendor ID  \u2022 Invoice date  \u2022 Amount  5. AI-Powered Validation  Use Azure OpenAI LLM to:  \u2022 Detect anomalies in",
+          "rank": 4,
+          "score": 0.3664486132834077
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "12",
+          "quote": "\u2022 Validation of Extraction Manually and approval  \u2022 Store structured data.  Stage 3 \u2014 Data Validation  Activities:  \u2022 PO and invoice reconciliation  \u2022 Duplicate invoice detection  \u2022 Tax calculation validation.  \u2022 Vendor validation  Stage 4 \u2014 Workflow Automation  Activities:  \u2022 Configure approval wor",
+          "rank": 5,
+          "score": 0.36943148169525697
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "3",
+          "quote": "This engagement aims to implement an intelligent AI-enabled invoice processing solution that will:  \u2022 Automate document understanding.  \u2022 Improve invoice validation accuracy.  \u2022 Accelerate approval workflows.  \u2022 Strengthen financial governance.  \u2022 Provide real-time operational insights.",
+          "rank": 6,
+          "score": 0.38163357898507133
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "6",
+          "quote": "AD)  Manage authentication, role-based access control (RBAC),  and secure user access to applications and APIs.  Monitoring &  Observability  Azure Monitor /  Application Insights  Monitor system performance, track logs, identify failures,  and ensure operational reliability.  6. Project Scope of Wo",
+          "rank": 7,
+          "score": 0.4096239449806811
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "10",
+          "quote": "\u2022 Validation results  \u2022 Approval records  6. Analytics & Reporting  Develop Power BI dashboards including:  Operational dashboards:  \u2022 Invoice processing time.  \u2022 Pending approvals  \u2022 Exception rate  \u2022 Other Important KPI\u2019s in agreement with Wipro Team.  Business dashboards:",
+          "rank": 9,
+          "score": 0.41589216215863856
+        }
+      ]
+    },
+    {
+      "name": "wipro_followup_timeline_and_resources",
+      "passed": true,
+      "failures": [],
+      "user_content": "Find the phase durations and roles with FTEs.",
+      "user_id": "170a4024-1c07-4724-9412-a642172aad43",
+      "chat_mode": "document_only",
+      "history_count": 2,
+      "route": "document_question",
+      "route_reason": "User selected document-only mode.",
+      "route_confidence": "high",
+      "router_used": false,
+      "original_query": "Find the phase durations and roles with FTEs.",
+      "retrieval_query": "Wipro invoice processing SOW phase durations roles and FTEs",
+      "rewrite_used": true,
+      "rewrite_source": "llm",
+      "rewrite_confidence": "high",
+      "initial_k": 40,
+      "final_k": 8,
+      "retrieval_used": true,
+      "retrieval_confidence": "high",
+      "fallback_reason": null,
+      "retrieved_chunk_count": 40,
+      "selected_chunk_count": 8,
+      "retrieved_document_ids": [
+        "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+        "863222c2-7298-4049-9b9a-6e566c37414b"
+      ],
+      "selected_document_ids": [
+        "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15"
+      ],
+      "selected_pages": [
+        "1",
+        "3",
+        "4",
+        "13",
+        "12",
+        "11"
+      ],
+      "selected_context": [
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "1",
+          "quote": "Statement of Work (SOW) for Wipro   Version \u2013 1.0 | 11-03-2026    AI-Powered Intelligent Invoice Processing & Workflow Automation        Abstract  This Statement of Work (SOW) defines the scope, timeline,  methodology, key activities, and expected deliverables for a  project to be implemented on Mic",
+          "rank": 1,
+          "score": 0.33239019499237865
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "3",
+          "quote": "2. Validate invoice data against PO, BOQ, and contract information & documents.  3. Enable workflow-based approvals using automated routing.  4. Maintain audit logs and compliance records.  5. Provide real-time analytics dashboards for finance teams.  The implementation will be delivered in three ph",
+          "rank": 2,
+          "score": 0.39417749256420775
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "4",
+          "quote": "The key business objective is to empower WIPRO finance and operations teams with Generative AI-based  solutions to:  \u2022 Reduction in manual processing effort  \u2022 Improved invoice processing accuracy  \u2022 Reduced approval turnaround time  \u2022 Improved auditability and compliance  \u2022 Enhance transparency, go",
+          "rank": 3,
+          "score": 0.3955177901495591
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "13",
+          "quote": "Phase 2 \u2013 Validation & Ticketing System 6-8  Phase 3 \u2013 Workflow Automation & PBI Dashboard 6-8  UAT 2  Documentation, KT & Sign Off 1  Timeline total weeks: ~20-24 weeks 20  12. Resource Allocation  Role FTE  Lead Gen AI Engineer | Solution Architect 0.5  Senior Gen-AI Engineer | Data Engineer 2  Fr",
+          "rank": 4,
+          "score": 0.4341380682776944
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "12",
+          "quote": "\u2022 Validation of Extraction Manually and approval  \u2022 Store structured data.  Stage 3 \u2014 Data Validation  Activities:  \u2022 PO and invoice reconciliation  \u2022 Duplicate invoice detection  \u2022 Tax calculation validation.  \u2022 Vendor validation  Stage 4 \u2014 Workflow Automation  Activities:  \u2022 Configure approval wor",
+          "rank": 5,
+          "score": 0.4506954401348636
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "13",
+          "quote": "9. In Scope Deliverables  Phase Deliverable Success Criteria  P1 Document extraction system > 70%-80% extraction accuracy  P1 Field extraction dashboard Data visible in real time  P2 Validation engine Correct PO-Invoice reconciliation  P2 Exception detection Errors automatically flagged  P3 Workflow",
+          "rank": 6,
+          "score": 0.46279115949926086
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "11",
+          "quote": "\u2022 Vendor invoice analytics  \u2022 PO utilization  \u2022 Financial reconciliation reports  Deliverables  \u2022 Workflow automation engine  \u2022 Approval dashboards  \u2022 ERP integration  \u2022 Analytics dashboards  Out of Scope  The following items are outside the current scope unless specifically agreed:  \u2022 ERP system mo",
+          "rank": 7,
+          "score": 0.46899459846366276
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "1",
+          "quote": "Statement of Work (SOW) for Tata Sons   Version \u2013 1.1 | 23-03-2026    Deep Research AI Platform for Innovation Intelligence & Strategic Decision  Support        Abstract  This Statement of Work (SOW) defines the POC scope,  timeline, methodology, key activities, and expected  deliverables for a proj",
+          "rank": 8,
+          "score": 0.4905025608761111
+        }
+      ]
+    },
+    {
+      "name": "wipro_followup_azure_boq",
+      "passed": false,
+      "failures": [
+        {
+          "check": "required_terms_all",
+          "expected": "Microsoft Fabric",
+          "actual": "not found"
+        },
+        {
+          "check": "required_terms_all",
+          "expected": "Total $8,553.59",
+          "actual": "not found"
+        }
+      ],
+      "user_content": "What are the cost assumptions and total monthly estimate?",
+      "user_id": "170a4024-1c07-4724-9412-a642172aad43",
+      "chat_mode": "document_only",
+      "history_count": 2,
+      "route": "document_question",
+      "route_reason": "User selected document-only mode.",
+      "route_confidence": "high",
+      "router_used": false,
+      "original_query": "What are the cost assumptions and total monthly estimate?",
+      "retrieval_query": "Azure BOQ section in the Wipro invoice processing SOW: cost assumptions and total monthly estimate",
+      "rewrite_used": true,
+      "rewrite_source": "llm",
+      "rewrite_confidence": "high",
+      "initial_k": 40,
+      "final_k": 8,
+      "retrieval_used": true,
+      "retrieval_confidence": "high",
+      "fallback_reason": null,
+      "retrieved_chunk_count": 40,
+      "selected_chunk_count": 8,
+      "retrieved_document_ids": [
+        "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+        "863222c2-7298-4049-9b9a-6e566c37414b"
+      ],
+      "selected_document_ids": [
+        "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+        "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+        "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d"
+      ],
+      "selected_pages": [
+        "14",
+        "2",
+        "12",
+        "1",
+        "10"
+      ],
+      "selected_context": [
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "14",
+          "quote": "13. Assumptions  \u2022 ERP access will be provided.  \u2022 Sample documents will be available.  \u2022 Customer will define approval workflows.  \u2022 Azure infrastructure will be provisioned by customers.  \u2022 Customer IT team will support integration.  14. Azure BOQ  The BOQ shared below only covers Microsoft Azure ",
+          "rank": 1,
+          "score": 0.29603482963396566
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "14",
+          "quote": "Total pages processed \u2248 11,200 pages  Microsoft Azure Estimate - BOQ  Service category Service type Region Description  Estimated   Monthly  cost  Compute Azure Functions Central India  Premium tier, Pay as you go, EP2: 2  Cores(s), 7 GB RAM, 250 GB Storage, 2  Pre-warmed instances x 300 Hours, 0  A",
+          "rank": 2,
+          "score": 0.37379695381186917
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "2",
+          "quote": "12. Resource Allocation .................................................................................................................. 13  13. Assumptions .............................................................................................................................. 14  14. Azure ",
+          "rank": 3,
+          "score": 0.39056562754340496
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "12",
+          "quote": "\u2022 Patent database access is provided  \u2022 Azure services availability  \u2022 Stakeholder availability for feedback  \u2022 No languages other than English are considered for this scope  \u2022 No report generation considered as per discussion  \u2022 No Power BI Dashboard considered as per discussion  14. Azure BOQ  The",
+          "rank": 4,
+          "score": 0.3938777297234669
+        },
+        {
+          "document_id": "f814d17c-d0f8-4b5c-9cfd-907314ec2b15",
+          "chunk_id": null,
+          "filename": "Bizmetric - TataSons_SOW_BOM_Innovation_Intelligence_v2_28_03_2026 2.pdf",
+          "page": "2",
+          "quote": "12. Resource Allocation .................................................................................................................. 12  13. Assumptions .............................................................................................................................. 12  14. Azure ",
+          "rank": 5,
+          "score": 0.39448196817691406
+        },
+        {
+          "document_id": "c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99",
+          "chunk_id": null,
+          "filename": "Bizmetric - Wipro_SOW_Invoice_Processing_v1_draft 3.pdf",
+          "page": "1",
+          "quote": "Statement of Work (SOW) for Wipro   Version \u2013 1.0 | 11-03-2026    AI-Powered Intelligent Invoice Processing & Workflow Automation        Abstract  This Statement of Work (SOW) defines the scope, timeline,  methodology, key activities, and expected deliverables for a  project to be implemented on Mic",
+          "rank": 6,
+          "score": 0.3988439818006332
+        },
+        {
+          "document_id": "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+          "chunk_id": null,
+          "filename": "Bizmetric - Nippon_SOW_BOT.pdf",
+          "page": "2",
+          "quote": "12. Assumptions .............................................................................................................................. 10  13. Azure BOQ ................................................................................................................................. 10  14. G",
+          "rank": 7,
+          "score": 0.4048342357209973
+        },
+        {
+          "document_id": "35a7c0ce-f1ee-43ad-94a9-6febfc2f851d",
+          "chunk_id": null,
+          "filename": "Bizmetric - Nippon_SOW_BOT.pdf",
+          "page": "10",
+          "quote": "11. Resource Allocation  Role FTE  Lead Gen AI Engineer | Solution Architect 0.5  Senior Gen-AI Engineer 2  Front End Developer 0.5  DevOps Engineer 0.5  PMO 0.25  12. Assumptions  \u2022 APIs are stable and available  \u2022 KB is accurate and updated  \u2022 Customer provides timely access  \u2022 Azure infra provisi",
+          "rank": 8,
+          "score": 0.4110772931291833
+        }
+      ]
+    }
+  ]
+}

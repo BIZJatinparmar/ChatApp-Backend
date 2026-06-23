@@ -10,6 +10,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
+from langchain_core.documents import Document as LangchainDocument
 from langchain.messages import AIMessage, HumanMessage, SystemMessage
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -66,7 +67,82 @@ def load_cases(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     defaults = data.get("defaults") or {}
     if not isinstance(defaults, dict):
         raise ValueError("defaults must be an object when provided.")
+    fixtures = data.get("fixtures") or {}
+    if isinstance(fixtures, dict) and fixtures.get("documents"):
+        defaults = dict(defaults)
+        defaults["_fixture_documents"] = fixtures["documents"]
     return defaults, cases
+
+
+class FixtureVectorStore:
+    def __init__(self, documents: list[LangchainDocument]):
+        self.documents = documents
+
+    def similarity_search_with_score(self, query: str, k: int, filter: dict) -> list[tuple[LangchainDocument, float]]:
+        owner_id = filter.get("owner_id")
+        query_terms = {
+            term
+            for term in normalize_text(query).replace("_", " ").split()
+            if len(term) >= 3
+        }
+        scored: list[tuple[LangchainDocument, float]] = []
+        for doc in self.documents:
+            if owner_id and doc.metadata.get("owner_id") != owner_id:
+                continue
+            text = normalize_text(
+                " ".join(
+                    [
+                        doc.page_content,
+                        str(doc.metadata.get("filename", "")),
+                        str(doc.metadata.get("source", "")),
+                    ]
+                )
+            )
+            overlap = sum(1 for term in query_terms if term in text)
+            score = 1.0 / (1.0 + overlap)
+            scored.append((doc, score))
+        return sorted(scored, key=lambda item: item[1])[:k]
+
+
+class FixtureDocumentContext(ChatDocumentContext):
+    def __init__(self, fixture_documents: list[dict[str, Any]], default_user_id: str):
+        self.db = None
+        self.documents = [
+            LangchainDocument(
+                page_content=str(item.get("text") or ""),
+                metadata={
+                    "owner_id": str(item.get("owner_id") or default_user_id),
+                    "document_id": str(item.get("document_id") or f"fixture-{index}"),
+                    "filename": str(item.get("filename") or f"fixture-{index}.txt"),
+                    "source": str(item.get("filename") or f"fixture-{index}.txt"),
+                    "page": str(item.get("page") or "1"),
+                    "chunk_id": str(item.get("chunk_id") or f"fixture-{index}:1"),
+                },
+            )
+            for index, item in enumerate(fixture_documents, start=1)
+            if str(item.get("text") or "").strip()
+        ]
+        self.rag_service = RagService(FixtureVectorStore(self.documents))
+
+    def available_document_count(self, user: Any) -> int:
+        return sum(1 for doc in self.documents if doc.metadata.get("owner_id") == user.id)
+
+
+class FailingStructuredInvoker:
+    def invoke(self, messages: list[Any]) -> dict[str, Any]:
+        raise RuntimeError("LLM rewrite disabled for fixture evals.")
+
+
+class FailingLlm:
+    def with_structured_output(self, *args: Any, **kwargs: Any) -> FailingStructuredInvoker:
+        return FailingStructuredInvoker()
+
+    def get_num_tokens(self, text: str) -> int:
+        return len(text.split())
+
+
+def failing_llm_factory(model: str, temperature: float) -> FailingLlm:
+    return FailingLlm()
 
 
 def normalize_text(value: Any) -> str:
@@ -89,6 +165,23 @@ def selected_pages(selected_context: list[dict[str, Any]]) -> list[str]:
         if page is not None and str(page) not in pages:
             pages.append(str(page))
     return pages
+
+
+def selected_source_names(selected_context: list[dict[str, Any]]) -> list[str]:
+    sources: list[str] = []
+    for item in selected_context:
+        source = item.get("filename") or item.get("src")
+        if source and str(source) not in sources:
+            sources.append(str(source))
+    return sources
+
+
+def selected_source_sequence(selected_context: list[dict[str, Any]]) -> list[str]:
+    return [
+        str(source)
+        for item in selected_context
+        if (source := item.get("filename") or item.get("src"))
+    ]
 
 
 def messages_from_case(history: Any) -> list[HumanMessage | AIMessage]:
@@ -270,6 +363,8 @@ def evaluate_case(
     selected_context = state["selected_context"]
     actual_selected_doc_ids = selected_document_ids(selected_context)
     actual_pages = selected_pages(selected_context)
+    actual_sources = selected_source_names(selected_context)
+    actual_source_sequence = selected_source_sequence(selected_context)
     selected_text = " ".join(
         normalize_text(item.get("text"))
         for item in state["context"]
@@ -280,6 +375,8 @@ def evaluate_case(
         selected_doc_ids=actual_selected_doc_ids,
         retrieved_doc_ids=state["retrieved_document_ids"],
         selected_pages_=actual_pages,
+        selected_sources=actual_sources,
+        selected_source_sequence_=actual_source_sequence,
         selected_text=selected_text,
     )
 
@@ -307,6 +404,7 @@ def evaluate_case(
         "retrieved_document_ids": state["retrieved_document_ids"],
         "selected_document_ids": actual_selected_doc_ids,
         "selected_pages": actual_pages,
+        "selected_sources": actual_sources,
         "selected_context": selected_context,
     }
     return EvalResult(
@@ -339,6 +437,8 @@ def check_expectations(
     selected_doc_ids: list[str],
     retrieved_doc_ids: list[str],
     selected_pages_: list[str],
+    selected_sources: list[str],
+    selected_source_sequence_: list[str],
     selected_text: str,
 ) -> list[EvalFailure]:
     failures: list[EvalFailure] = []
@@ -435,12 +535,58 @@ def check_expectations(
         if normalize_text(term) not in selected_text:
             failures.append(EvalFailure("required_terms_all", term, "not found"))
 
+    for term in expected.get("selected_text_terms_all", []):
+        if normalize_text(term) not in selected_text:
+            failures.append(EvalFailure("selected_text_terms_all", term, "not found"))
+
+    text_terms_any = expected.get("selected_text_terms_any", [])
+    if text_terms_any and not any(normalize_text(term) in selected_text for term in text_terms_any):
+        failures.append(EvalFailure("selected_text_terms_any", text_terms_any, "not found"))
+
+    for index, group in enumerate(expected.get("selected_text_term_groups_all", []), start=1):
+        if isinstance(group, dict):
+            terms = group.get("terms", [])
+            label = group.get("name") or f"group_{index}"
+        else:
+            terms = group
+            label = f"group_{index}"
+        if not isinstance(terms, list) or not terms:
+            failures.append(EvalFailure("selected_text_term_groups_all", label, "invalid group"))
+            continue
+        if not any(normalize_text(term) in selected_text for term in terms):
+            failures.append(EvalFailure("selected_text_term_groups_all", {label: terms}, "not found"))
+
     forbidden_hits = [
         term for term in expected.get("forbidden_terms_any", [])
         if normalize_text(term) in selected_text
     ]
     if forbidden_hits:
         failures.append(EvalFailure("forbidden_terms_any", [], forbidden_hits))
+
+    selected_source_text = normalize_text(" ".join(selected_sources))
+    forbidden_source_hits = [
+        term
+        for term in expected.get("selected_source_names_forbidden_any", [])
+        if normalize_text(term) in selected_source_text
+    ]
+    if forbidden_source_hits:
+        failures.append(
+            EvalFailure("selected_source_names_forbidden_any", [], forbidden_source_hits)
+        )
+
+    if "max_foreign_source_count" in expected and selected_source_sequence_:
+        primary_source = selected_source_sequence_[0]
+        foreign_source_count = sum(
+            1 for source in selected_source_sequence_ if source != primary_source
+        )
+        if foreign_source_count > int(expected["max_foreign_source_count"]):
+            failures.append(
+                EvalFailure(
+                    "max_foreign_source_count",
+                    expected["max_foreign_source_count"],
+                    foreign_source_count,
+                )
+            )
 
     check_min_confidence(
         failures=failures,
@@ -538,11 +684,24 @@ def main(argv: list[str] | None = None) -> int:
     defaults, cases = load_cases(cases_path)
     default_user_id = args.user_id or defaults.get("user_id")
 
-    db = SessionLocal()
+    fixture_documents = defaults.get("_fixture_documents")
+    db = None
     try:
-        rag_service = RagService(get_vector_db())
-        document_context = ChatDocumentContext(db, rag_service=rag_service)
-        route_planner = ChatRoutePlanner(document_context.available_document_count)
+        if fixture_documents:
+            default_user_id = str(default_user_id or "fixture-user")
+            document_context = FixtureDocumentContext(
+                fixture_documents,
+                default_user_id=default_user_id,
+            )
+            route_planner = ChatRoutePlanner(
+                document_context.available_document_count,
+                llm_factory=failing_llm_factory,
+            )
+        else:
+            db = SessionLocal()
+            rag_service = RagService(get_vector_db())
+            document_context = ChatDocumentContext(db, rag_service=rag_service)
+            route_planner = ChatRoutePlanner(document_context.available_document_count)
         results = [
             evaluate_case(
                 case=case,
@@ -554,7 +713,8 @@ def main(argv: list[str] | None = None) -> int:
             for case in cases
         ]
     finally:
-        db.close()
+        if db is not None:
+            db.close()
 
     report = {
         "passed": sum(1 for result in results if result.passed),

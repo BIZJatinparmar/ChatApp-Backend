@@ -9,6 +9,7 @@ Run from the backend root:
 
 ```powershell
 python scripts/run_rag_evals.py evals/rag_retrieval_cases.json
+python scripts/run_rag_evals.py evals/rag_synthetic_cases.json
 ```
 
 Useful options:
@@ -35,9 +36,14 @@ Case format:
     "generated_query_terms_all": ["Tata Sons", "resource allocation"],
     "generated_query_forbidden_terms_any": ["Nippon", "Wipro"],
     "min_rewrite_confidence": "medium",
-    "selected_document_ids_any": ["f814d17c-d0f8-4b5c-9cfd-907314ec2b15"],
-    "selected_pages_any": ["12"],
-    "required_terms_all": ["Lead Gen AI Engineer", "Data Engineer"]
+    "selected_text_term_groups_all": [
+      {
+        "name": "resources",
+        "terms": ["Resource Allocation", "Lead Gen AI Engineer", "Data Engineer"]
+      }
+    ],
+    "selected_source_names_forbidden_any": ["Nippon", "Wipro"],
+    "max_foreign_source_count": 0
   }
 }
 ```
@@ -74,14 +80,37 @@ Query-generation expectation fields:
 
 Retrieval expectation fields:
 
+- `selected_text_terms_all`: every listed term must appear in selected context text.
+- `selected_text_terms_any`: at least one listed term must appear in selected
+  context text.
+- `selected_text_term_groups_all`: every group must have at least one matching
+  term. Groups can be arrays of terms or objects with `name` and `terms`.
+- `selected_source_names_forbidden_any`: none of these terms may appear in the
+  selected source filenames.
+- `max_foreign_source_count`: maximum number of selected chunks whose source
+  filename differs from the first selected source.
+- `forbidden_terms_any`: none of these terms may appear in selected context text.
+- `min_confidence`: actual retrieval confidence must be at least `low`,
+  `medium`, or `high`.
+- `confidence`: exact expected retrieval confidence.
+- `fallback_reason`: exact fallback reason, or `null` when no fallback is expected.
+
+Legacy/debug-only retrieval fields:
+
 - `selected_document_ids_any`: at least one listed document must be selected.
 - `selected_document_ids_all`: every listed document must be selected.
 - `retrieved_document_ids_all`: every listed document must appear in initial retrieval.
 - `selected_pages_any`: at least one listed page must be selected.
 - `selected_pages_all`: every listed page must be selected.
 - `required_terms_all`: every listed term must appear in selected context text.
-- `forbidden_terms_any`: none of these terms may appear in selected context text.
-- `min_confidence`: actual retrieval confidence must be at least `low`,
-  `medium`, or `high`.
-- `confidence`: exact expected retrieval confidence.
-- `fallback_reason`: exact fallback reason, or `null` when no fallback is expected.
+
+Document IDs remain in reports for debugging and citation traceability, but
+normal eval cases should not use UUIDs as pass/fail criteria.
+
+Fixture-backed evals:
+
+- A case file may include `fixtures.documents` with `filename`, `text`, optional
+  `page`, `document_id`, and `owner_id`.
+- Fixture evals use the same query planning and `RagService` reranking path, but
+  use a deterministic in-memory vector store and disable LLM rewriting so they
+  can run without uploaded documents.

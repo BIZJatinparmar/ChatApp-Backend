@@ -1,0 +1,138 @@
+{
+  "defaults": {
+    "user_id": "fixture-user",
+    "chat_mode": "document_only"
+  },
+  "fixtures": {
+    "documents": [
+      {
+        "document_id": "fixture-vendor-1",
+        "filename": "vendor_contract.txt",
+        "page": "1",
+        "text": "Vendor Contract Alpha termination requires 30 days notice before cancellation. The contract also requires written notice from the purchasing manager."
+      },
+      {
+        "document_id": "fixture-vendor-1",
+        "filename": "vendor_contract.txt",
+        "page": "2",
+        "text": "Vendor Contract Alpha payment terms require invoices to be submitted monthly with net 15 payment."
+      },
+      {
+        "document_id": "fixture-policy-1",
+        "filename": "product_policy.txt",
+        "page": "1",
+        "text": "Product Policy Handbook support tiers are Silver, Gold, and Platinum. Platinum includes four hour response time and priority escalation."
+      },
+      {
+        "document_id": "fixture-invoice-1",
+        "filename": "invoice_process.txt",
+        "page": "1",
+        "text": "Invoice Process Guide validation controls include PO matching, duplicate invoice detection, tax calculation checks, and exception routing."
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "synthetic_vendor_followup_termination",
+      "history": [
+        {
+          "role": "user",
+          "content": "Summarize Vendor Contract Alpha."
+        },
+        {
+          "role": "assistant",
+          "content": "Vendor Contract Alpha covers termination notice and payment terms."
+        }
+      ],
+      "user_content": "What about termination?",
+      "expected": {
+        "route": "document_question",
+        "rewrite_source": "heuristic",
+        "generated_query_terms_all": ["Vendor Contract Alpha", "termination"],
+        "selected_text_term_groups_all": [
+          {
+            "name": "termination_notice",
+            "terms": ["30 days notice", "written notice"]
+          }
+        ],
+        "selected_source_names_forbidden_any": ["product_policy", "invoice_process"],
+        "max_foreign_source_count": 0,
+        "min_confidence": "medium",
+        "fallback_reason": null
+      }
+    },
+    {
+      "name": "synthetic_policy_followup_support",
+      "history": [
+        {
+          "role": "user",
+          "content": "We are reviewing the Product Policy Handbook."
+        },
+        {
+          "role": "assistant",
+          "content": "The Product Policy Handbook includes support tiers and escalation rules."
+        }
+      ],
+      "user_content": "What are the support tiers?",
+      "expected": {
+        "route": "document_question",
+        "rewrite_source": "heuristic",
+        "generated_query_terms_all": ["Product Policy Handbook", "support tiers"],
+        "selected_text_term_groups_all": [
+          {
+            "name": "tiers",
+            "terms": ["Silver", "Gold", "Platinum"]
+          },
+          {
+            "name": "sla",
+            "terms": ["four hour response time", "priority escalation"]
+          }
+        ],
+        "selected_source_names_forbidden_any": ["vendor_contract", "invoice_process"],
+        "max_foreign_source_count": 0,
+        "min_confidence": "medium",
+        "fallback_reason": null
+      }
+    },
+    {
+      "name": "synthetic_invoice_validation_disambiguation",
+      "history": [
+        {
+          "role": "user",
+          "content": "Use the Invoice Process Guide."
+        },
+        {
+          "role": "assistant",
+          "content": "The Invoice Process Guide covers validation controls and exception routing."
+        }
+      ],
+      "user_content": "Which validation controls are included?",
+      "expected": {
+        "route": "document_question",
+        "rewrite_source": "heuristic",
+        "generated_query_terms_all": ["Invoice Process Guide", "validation controls"],
+        "selected_text_term_groups_all": [
+          {
+            "name": "validation_controls",
+            "terms": ["PO matching", "duplicate invoice detection", "tax calculation"]
+          }
+        ],
+        "selected_source_names_forbidden_any": ["vendor_contract", "product_policy"],
+        "max_foreign_source_count": 0,
+        "min_confidence": "medium",
+        "fallback_reason": null
+      }
+    },
+    {
+      "name": "synthetic_general_chat_bypass",
+      "chat_mode": "general_only",
+      "user_content": "Write a short greeting for a dashboard.",
+      "expected": {
+        "route": "general_chat",
+        "route_confidence": "high",
+        "rewrite_used": false,
+        "fallback_reason": null
+      }
+    }
+  ]
+}

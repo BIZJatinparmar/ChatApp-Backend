@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from langchain.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.graph import END, StateGraph
 from sqlalchemy.orm import Session
@@ -23,6 +25,37 @@ from app.services.chat.tokens import (
     parse_usage,
 )
 from app.services.chat.types import AgentState
+
+
+_CITATION_MARKER_RE = re.compile(r"\[(\d+)\](?:\([^)]*\))?")
+
+
+def extract_citation_indexes(content: str) -> set[int]:
+    return {
+        int(match)
+        for match in _CITATION_MARKER_RE.findall(content)
+        if int(match) > 0
+    }
+
+
+def filter_citations_for_answer(answer: str, citations: list[dict]) -> list[dict]:
+    used_indexes = extract_citation_indexes(answer)
+    if not used_indexes:
+        return []
+
+    filtered: list[dict] = []
+    seen_indexes: set[int] = set()
+    for citation in citations:
+        index = citation.get("index")
+        if not isinstance(index, int):
+            continue
+        if index not in used_indexes or index in seen_indexes:
+            continue
+
+        filtered.append(citation)
+        seen_indexes.add(index)
+
+    return filtered
 
 
 class ChatStreamService:
@@ -181,9 +214,6 @@ class ChatStreamService:
             seen_statuses.add(status)
             yield to_ndjson({"type": "status", "status": status})
 
-        for citation in graph_state["citations"]:
-            yield to_ndjson({"type": "citation", "citation": citation})
-
         usage = dict(graph_state["usage"])
         total_answer_input_tokens = 0
         total_answer_output_tokens = 0
@@ -235,6 +265,10 @@ class ChatStreamService:
                 usage["answer_output_tokens"] += total_answer_output_tokens
 
             full_response = "".join(parts).strip()
+            final_citations = filter_citations_for_answer(
+                full_response,
+                graph_state["citations"],
+            )
             assistant_input_tokens = (
                 usage["router_input_tokens"] + usage["answer_input_tokens"]
             )
@@ -266,14 +300,17 @@ class ChatStreamService:
                     "retrieval_confidence": graph_state["retrieval_confidence"],
                     "fallback_reason": graph_state["fallback_reason"],
                     "answer_kind": graph_state["answer_kind"],
-                    "citations": graph_state["citations"],
-                    "citation_count": len(graph_state["citations"]),
+                    "citations": final_citations,
+                    "citation_count": len(final_citations),
                 },
             )
 
             self.message_repository.create_message(assistant_message)
             self._persist_rag_retrieval_event(graph_state, assistant_message.id)
             self.db.commit()
+
+            for citation in final_citations:
+                yield to_ndjson({"type": "citation", "citation": citation})
 
             yield to_ndjson({"type": "done"})
 

@@ -25,7 +25,11 @@ from app.services.chat.prompt_builder import ChatPromptBuilder
 from app.services.chat.route_planner import ChatRoutePlanner
 from app.services.chat.tokens import parse_usage
 from app.services.chat.types import QueryRewriteStructure
-from app.services.chat_stream_service import ChatStreamService
+from app.services.chat_stream_service import (
+    ChatStreamService,
+    extract_citation_indexes,
+    filter_citations_for_answer,
+)
 from app.services.conversation_service import ConversationService
 from app.services.document_service import DocumentService
 from app.services.rag_service import RagService
@@ -102,6 +106,22 @@ class ChatHelperTests(unittest.TestCase):
             (3, 4, 0),
         )
 
+    def test_filter_citations_for_answer_keeps_only_used_indexes(self):
+        citations = [
+            {"index": 1, "documentId": "doc-1"},
+            {"index": 2, "documentId": "doc-2"},
+            {"index": 3, "documentId": "doc-3"},
+        ]
+
+        self.assertEqual(extract_citation_indexes("Answer [1] and [3](bad-link)"), {1, 3})
+        self.assertEqual(
+            filter_citations_for_answer("Answer [1] and [3](bad-link)", citations),
+            [
+                {"index": 1, "documentId": "doc-1"},
+                {"index": 3, "documentId": "doc-3"},
+            ],
+        )
+
 
 class RagSchemaTests(unittest.TestCase):
     def test_bootstrap_creates_rag_retrieval_events_table(self):
@@ -166,6 +186,22 @@ class ChatRoutePlannerTests(unittest.TestCase):
 
         self.assertEqual(result["route"], "document_question")
         self.assertEqual(result["route_reason"], "Message contains document-reference keywords.")
+
+    def test_fast_route_treats_document_noun_questions_as_document_hints(self):
+        planner = ChatRoutePlanner(lambda user: 5)
+
+        examples = [
+            "What is in the project proposal?",
+            "What does the vendor agreement state?",
+            "Summarize the quarterly report.",
+            "What does the Nippon SOW state?",
+        ]
+
+        for example in examples:
+            with self.subTest(example=example):
+                result = planner.fast_route(make_state(example))
+                self.assertEqual(result["route"], "document_question")
+                self.assertEqual(result["route_confidence"], "high")
 
     def test_fast_route_uses_general_path_for_greeting_or_no_documents(self):
         planner = ChatRoutePlanner(lambda user: 0)
@@ -235,6 +271,58 @@ class ChatRoutePlannerTests(unittest.TestCase):
         self.assertEqual(result["rewrite_source"], "heuristic")
         self.assertEqual(result["initial_k"], 30)
 
+    def test_heuristic_rewrite_uses_compact_salient_history(self):
+        planner = ChatRoutePlanner(
+            lambda user: 1,
+            llm_factory=lambda model, temperature: FakeRewriteLlm(should_raise=True),
+        )
+
+        result = planner.plan_retrieval(
+            make_state(
+                "What about termination?",
+                ChatMode.document_only,
+                route="document_question",
+                route_reason="User selected document-only mode.",
+                history=[
+                    HumanMessage(content="We are reviewing the Vendor Agreement."),
+                ],
+            )
+        )
+
+        self.assertEqual(
+            result["retrieval_query"],
+            "Vendor Agreement What about termination?",
+        )
+        self.assertNotIn("Context from recent conversation", result["retrieval_query"])
+
+    def test_document_correction_followup_reuses_previous_question(self):
+        planner = ChatRoutePlanner(
+            lambda user: 1,
+            llm_factory=lambda model, temperature: FakeRewriteLlm(
+                QueryRewriteStructure(
+                    rewritten_query="uploaded document reference",
+                    confidence="medium",
+                    reasoning="Bad correction rewrite.",
+                )
+            ),
+        )
+
+        result = planner.plan_retrieval(
+            make_state(
+                "It is an uploaded document you dummy",
+                ChatMode.document_only,
+                route="document_question",
+                route_reason="Message contains document-reference keywords.",
+                history=[
+                    HumanMessage(content="What does the Nippon SOW state?"),
+                    HumanMessage(content="It is an uploaded document you dummy"),
+                ],
+            )
+        )
+
+        self.assertEqual(result["retrieval_query"], "What does the Nippon SOW state?")
+        self.assertEqual(result["rewrite_source"], "heuristic")
+
 
 class ChatPromptBuilderTests(unittest.TestCase):
     def test_prompt_builder_returns_no_document_fallback(self):
@@ -288,7 +376,8 @@ class ChatPromptBuilderTests(unittest.TestCase):
             },
         )
         self.assertIn("Document context:", result["system_message"].content)
-        self.assertIn("Use numbered citation markers", result["system_message"].content)
+        self.assertIn("Use [1] style markers only", result["system_message"].content)
+        self.assertIn("Do not create markdown links", result["system_message"].content)
 
     def test_prompt_builder_omits_clickable_citations_without_document_id(self):
         builder = ChatPromptBuilder()
@@ -427,6 +516,88 @@ class RagServiceTests(unittest.TestCase):
         self.assertEqual(result["retrieval_confidence"], "low")
         self.assertEqual(result["fallback_reason"], "no_retrieval_results")
 
+    def test_reranker_prefers_source_and_topic_match(self):
+        docs = [
+            (
+                LangchainDocument(
+                    page_content="Statement of Work abstract for a generic AI platform.",
+                    metadata={
+                        "document_id": "abg",
+                        "filename": "ABG_platform.pdf",
+                        "page": "1",
+                        "chunk_id": "abg:1",
+                    },
+                ),
+                0.1,
+            ),
+            (
+                LangchainDocument(
+                    page_content="Resource Allocation Role FTE Lead Gen AI Engineer PMO.",
+                    metadata={
+                        "document_id": "wipro",
+                        "filename": "Wipro_invoice_processing.pdf",
+                        "page": "13",
+                        "chunk_id": "wipro:13",
+                    },
+                ),
+                0.35,
+            ),
+        ]
+        service = RagService(FakeVectorStore(docs))
+
+        result = service.get_ranked_context_result(
+            "Wipro invoice processing resource allocation roles FTE",
+            SimpleNamespace(id="user-1"),
+            initial_k=10,
+            final_k=2,
+        )
+
+        self.assertEqual(result.selected_docs[0].metadata["document_id"], "wipro")
+        self.assertGreater(result.selected_docs[0].metadata["rerank_score"], 0)
+
+    def test_reranker_limits_foreign_source_contamination(self):
+        docs = [
+            (
+                LangchainDocument(
+                    page_content=f"Wipro invoice validation reconciliation control {index}",
+                    metadata={
+                        "document_id": "wipro",
+                        "filename": "Wipro_invoice_processing.pdf",
+                        "page": str(index),
+                        "chunk_id": f"wipro:{index}",
+                    },
+                ),
+                0.3 + (index * 0.01),
+            )
+            for index in range(1, 5)
+        ] + [
+            (
+                LangchainDocument(
+                    page_content="Tata innovation platform validation overview.",
+                    metadata={
+                        "document_id": "tata",
+                        "filename": "Tata_innovation.pdf",
+                        "page": "3",
+                        "chunk_id": "tata:3",
+                    },
+                ),
+                0.2,
+            )
+        ]
+        service = RagService(FakeVectorStore(docs))
+
+        result = service.get_ranked_context_result(
+            "Wipro invoice validation reconciliation",
+            SimpleNamespace(id="user-1"),
+            initial_k=10,
+            final_k=4,
+        )
+
+        self.assertEqual(
+            [doc.metadata["document_id"] for doc in result.selected_docs],
+            ["wipro", "wipro", "wipro", "wipro"],
+        )
+
 
 class FakeEvalDocumentContext:
     def __init__(self):
@@ -506,6 +677,8 @@ class RagEvalRunnerTests(unittest.TestCase):
             selected_doc_ids=[],
             retrieved_doc_ids=[],
             selected_pages_=[],
+            selected_sources=[],
+            selected_source_sequence_=[],
             selected_text="Lead Gen AI Engineer",
         )
 
@@ -553,9 +726,14 @@ class RagEvalRunnerTests(unittest.TestCase):
                     "rewrite_source": "llm",
                     "min_rewrite_confidence": "high",
                     "generated_query_terms_all": ["Vendor agreement", "termination"],
-                    "selected_document_ids_any": ["doc-1"],
-                    "selected_pages_any": ["2"],
-                    "required_terms_all": ["30 days notice"],
+                    "selected_text_term_groups_all": [
+                        {
+                            "name": "termination_notice",
+                            "terms": ["30 days notice", "termination requires"],
+                        }
+                    ],
+                    "selected_source_names_forbidden_any": ["policy"],
+                    "max_foreign_source_count": 0,
                     "min_confidence": "high",
                     "fallback_reason": None,
                 },
@@ -570,6 +748,47 @@ class RagEvalRunnerTests(unittest.TestCase):
         self.assertEqual(document_context.queries, ["Vendor agreement termination notice"])
         self.assertEqual(result.summary["user_content"], "What about termination?")
         self.assertEqual(result.summary["retrieval_query"], "Vendor agreement termination notice")
+        self.assertEqual(result.summary["selected_document_ids"], ["doc-1"])
+
+    def test_generalized_text_expectations_report_failures(self):
+        state = make_state(
+            "What about support?",
+            route="document_question",
+            route_confidence="high",
+            retrieval_query="Product policy support tiers",
+            rewrite_source="llm",
+            rewrite_confidence="high",
+            retrieval_confidence="high",
+        )
+
+        failures = check_expectations(
+            expected={
+                "selected_text_terms_all": ["support tiers"],
+                "selected_text_terms_any": ["gold", "platinum"],
+                "selected_text_term_groups_all": [
+                    {"name": "sla", "terms": ["response time", "uptime"]}
+                ],
+                "selected_source_names_forbidden_any": ["invoice"],
+                "max_foreign_source_count": 0,
+            },
+            state=state,
+            selected_doc_ids=[],
+            retrieved_doc_ids=[],
+            selected_pages_=[],
+            selected_sources=["product_policy.txt", "invoice_process.txt"],
+            selected_source_sequence_=["product_policy.txt", "invoice_process.txt"],
+            selected_text="Product policy support tiers includes silver tier.",
+        )
+
+        self.assertEqual(
+            {failure.check for failure in failures},
+            {
+                "selected_text_terms_any",
+                "selected_text_term_groups_all",
+                "selected_source_names_forbidden_any",
+                "max_foreign_source_count",
+            },
+        )
 
 
 class FakeMessageRepository:
@@ -661,7 +880,11 @@ class ChatStreamServiceTests(unittest.TestCase):
     def test_stream_messages_persists_and_streams_expected_events(self):
         graph_state = {
             "status_events": ["answering_generally"],
-            "citations": [{"documentId": "doc-1"}],
+            "citations": [
+                {"index": 1, "documentId": "doc-1"},
+                {"index": 2, "documentId": "doc-2"},
+                {"index": 3, "documentId": "doc-3"},
+            ],
             "usage": {
                 "router_input_tokens": 1,
                 "router_output_tokens": 2,
@@ -688,14 +911,14 @@ class ChatStreamServiceTests(unittest.TestCase):
             FakeModel(
                 [
                     FakeChunk(
-                        "Hello",
+                        "Hello [1]",
                         {
                             "input_tokens": 5,
                             "output_tokens": 3,
                             "total_tokens": 8,
                         },
                     ),
-                    FakeChunk(" there", {"input_tokens": 5, "output_tokens": 2}),
+                    FakeChunk(" there [3]", {"input_tokens": 5, "output_tokens": 2}),
                 ]
             ),
         )
@@ -712,20 +935,28 @@ class ChatStreamServiceTests(unittest.TestCase):
 
         self.assertEqual(
             [event["type"] for event in decoded],
-            ["status", "citation", "token", "token", "done"],
+            ["status", "token", "token", "citation", "citation", "done"],
         )
-        self.assertEqual(decoded[2]["content"], "Hello")
-        self.assertEqual(decoded[3]["content"], " there")
+        self.assertEqual(decoded[1]["content"], "Hello [1]")
+        self.assertEqual(decoded[2]["content"], " there [3]")
+        self.assertEqual(decoded[3]["citation"], {"index": 1, "documentId": "doc-1"})
+        self.assertEqual(decoded[4]["citation"], {"index": 3, "documentId": "doc-3"})
         self.assertTrue(service.db.committed)
         self.assertEqual(len(service.message_repository.created), 2)
         assistant_message = service.message_repository.created[-1]
-        self.assertEqual(assistant_message.content, "Hello there")
+        self.assertEqual(assistant_message.content, "Hello [1] there [3]")
         self.assertEqual(assistant_message.input_tokens, 6)
         self.assertEqual(assistant_message.output_tokens, 7)
         self.assertEqual(assistant_message.total_tokens, 13)
         self.assertEqual(assistant_message.payload_json["route"], "general_chat")
-        self.assertEqual(assistant_message.payload_json["citations"], [{"documentId": "doc-1"}])
-        self.assertEqual(assistant_message.payload_json["citation_count"], 1)
+        self.assertEqual(
+            assistant_message.payload_json["citations"],
+            [
+                {"index": 1, "documentId": "doc-1"},
+                {"index": 3, "documentId": "doc-3"},
+            ],
+        )
+        self.assertEqual(assistant_message.payload_json["citation_count"], 2)
 
     def test_stream_messages_rolls_back_and_emits_error_on_model_failure(self):
         graph_state = {

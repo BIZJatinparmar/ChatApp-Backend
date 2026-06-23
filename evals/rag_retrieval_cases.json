@@ -22,14 +22,18 @@
         "generated_query_terms_all": ["Nippon Life", "resource allocation"],
         "generated_query_forbidden_terms_any": ["Tata Sons", "Wipro"],
         "min_rewrite_confidence": "medium",
-        "selected_document_ids_any": ["35a7c0ce-f1ee-43ad-94a9-6febfc2f851d"],
-        "selected_pages_any": ["10"],
-        "required_terms_all": [
-          "Resource Allocation",
-          "Lead Gen AI Engineer",
-          "Senior Gen-AI Engineer",
-          "PMO"
+        "selected_text_term_groups_all": [
+          {
+            "name": "resource_section",
+            "terms": ["Resource Allocation", "Role FTE", "Lead Gen AI Engineer"]
+          },
+          {
+            "name": "staffing_role",
+            "terms": ["Senior Gen-AI Engineer", "Front End Developer", "PMO"]
+          }
         ],
+        "selected_source_names_forbidden_any": ["TataSons", "Wipro"],
+        "max_foreign_source_count": 0,
         "min_confidence": "medium",
         "fallback_reason": null
       }
@@ -51,14 +55,18 @@
         "route": "document_question",
         "generated_query_terms_all": ["Nippon Life", "Azure"],
         "generated_query_terms_any": ["architecture", "components", "security"],
-        "selected_document_ids_any": ["35a7c0ce-f1ee-43ad-94a9-6febfc2f851d"],
-        "selected_pages_any": ["5", "6"],
-        "required_terms_all": [
-          "Azure WAF",
-          "Azure Static Web Apps",
-          "Azure Key Vault",
-          "Azure OpenAI"
+        "selected_text_term_groups_all": [
+          {
+            "name": "security",
+            "terms": ["Azure WAF", "Key Vault", "RBAC"]
+          },
+          {
+            "name": "ai_and_storage",
+            "terms": ["Azure OpenAI", "Blob Storage", "Azure SQL"]
+          }
         ],
+        "selected_source_names_forbidden_any": ["TataSons", "Wipro"],
+        "max_foreign_source_count": 0,
         "min_confidence": "medium",
         "fallback_reason": null
       }
@@ -79,17 +87,21 @@
       "expected": {
         "route": "document_question",
         "generated_query_terms_all": ["Tata Sons", "Deep Research AI RAG"],
-        "generated_query_terms_any": ["innovation", "patent", "white space"],
+        "generated_query_terms_any": ["objective", "inputs", "innovation"],
         "generated_query_forbidden_terms_any": ["Nippon", "Wipro"],
         "min_rewrite_confidence": "medium",
-        "selected_document_ids_any": ["f814d17c-d0f8-4b5c-9cfd-907314ec2b15"],
-        "selected_pages_any": ["3", "4"],
-        "required_terms_all": [
-          "Deep Research AI RAG",
-          "internal innovation data",
-          "patent databases",
-          "White Space Analysis"
+        "selected_text_term_groups_all": [
+          {
+            "name": "objective",
+            "terms": ["innovation intelligence", "strategic decision support", "data-driven RAG"]
+          },
+          {
+            "name": "inputs",
+            "terms": ["internal innovation data", "patent databases", "external intelligence"]
+          }
         ],
+        "selected_source_names_forbidden_any": ["Nippon", "Wipro"],
+        "max_foreign_source_count": 0,
         "min_confidence": "medium",
         "fallback_reason": null
       }
@@ -113,14 +125,18 @@
         "generated_query_terms_any": ["timeline", "duration"],
         "generated_query_forbidden_terms_any": ["Nippon", "Wipro"],
         "min_rewrite_confidence": "medium",
-        "selected_document_ids_any": ["f814d17c-d0f8-4b5c-9cfd-907314ec2b15"],
-        "selected_pages_any": ["12"],
-        "required_terms_all": [
-          "Timeline total weeks",
-          "Agent Development",
-          "Lead Gen AI Engineer",
-          "Data Engineer"
+        "selected_text_term_groups_all": [
+          {
+            "name": "timeline",
+            "terms": ["Timeline total weeks", "Discovery", "Agent Development"]
+          },
+          {
+            "name": "resources",
+            "terms": ["Resource Allocation", "Lead Gen AI Engineer", "Data Engineer"]
+          }
         ],
+        "selected_source_names_forbidden_any": ["Nippon", "Wipro"],
+        "max_foreign_source_count": 0,
         "min_confidence": "medium",
         "fallback_reason": null
       }
@@ -142,14 +158,18 @@
         "route": "document_question",
         "generated_query_terms_all": ["ABG IntelAct", "capabilities"],
         "generated_query_terms_any": ["channels", "security", "usage statistics"],
-        "selected_document_ids_any": ["863222c2-7298-4049-9b9a-6e566c37414b"],
-        "selected_pages_any": ["3", "5"],
-        "required_terms_all": [
-          "multi-large language models",
-          "Agent creation studio",
-          "50,000+ Users",
-          "ABG Cloud"
+        "selected_text_term_groups_all": [
+          {
+            "name": "capabilities",
+            "terms": ["multi-large language models", "Agent creation", "Generative AI studio"]
+          },
+          {
+            "name": "adoption_or_security",
+            "terms": ["50,000+ Users", "ABG Cloud", "security"]
+          }
         ],
+        "selected_source_names_forbidden_any": ["TataSons", "Nippon", "Wipro"],
+        "max_foreign_source_count": 0,
         "min_confidence": "medium",
         "fallback_reason": null
       }
@@ -169,16 +189,20 @@
       "user_content": "What are the product, UX, technical, and cost-management challenges?",
       "expected": {
         "route": "document_question",
-        "generated_query_terms_all": ["ABG IntelAct", "current challenges"],
-        "generated_query_terms_any": ["cost", "technical", "UX"],
-        "selected_document_ids_any": ["863222c2-7298-4049-9b9a-6e566c37414b"],
-        "selected_pages_any": ["8", "14"],
-        "required_terms_all": [
-          "Advanced Conversation Intelligence",
-          "50 MB",
-          "Configurable User Mgmt",
-          "Cost management"
+        "generated_query_terms_all": ["ABG IntelAct"],
+        "generated_query_terms_any": ["challenges", "cost", "technical", "UX"],
+        "selected_text_term_groups_all": [
+          {
+            "name": "challenge_types",
+            "terms": ["UX", "technical", "product", "cost"]
+          },
+          {
+            "name": "challenge_detail",
+            "terms": ["Advanced Conversation Intelligence", "50 MB", "Cost management"]
+          }
         ],
+        "selected_source_names_forbidden_any": ["TataSons", "Nippon", "Wipro"],
+        "max_foreign_source_count": 0,
         "min_confidence": "medium",
         "fallback_reason": null
       }
@@ -202,14 +226,18 @@
         "generated_query_terms_any": ["reconciliation", "PO matching", "invoice"],
         "generated_query_forbidden_terms_any": ["Tata Sons", "Nippon"],
         "min_rewrite_confidence": "medium",
-        "selected_document_ids_any": ["c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99"],
-        "selected_pages_any": ["8", "9"],
-        "required_terms_all": [
-          "PO-to-Invoice Validation",
-          "Three-Way Matching",
-          "Duplicate Invoice Detection",
-          "Azure OpenAI"
+        "selected_text_term_groups_all": [
+          {
+            "name": "validation",
+            "terms": ["PO-to-Invoice Validation", "PO and invoice reconciliation", "Three-Way Matching"]
+          },
+          {
+            "name": "controls",
+            "terms": ["Duplicate Invoice Detection", "Tax calculation", "Azure OpenAI"]
+          }
         ],
+        "selected_source_names_forbidden_any": ["TataSons", "Nippon"],
+        "max_foreign_source_count": 0,
         "min_confidence": "medium",
         "fallback_reason": null
       }
@@ -233,14 +261,18 @@
         "generated_query_terms_any": ["timeline", "phase durations", "resource allocation"],
         "generated_query_forbidden_terms_any": ["Tata Sons", "Nippon"],
         "min_rewrite_confidence": "medium",
-        "selected_document_ids_any": ["c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99"],
-        "selected_pages_any": ["13"],
-        "required_terms_all": [
-          "Requirement & Setup",
-          "Workflow Automation",
-          "Lead Gen AI Engineer",
-          "Power BI"
+        "selected_text_term_groups_all": [
+          {
+            "name": "durations",
+            "terms": ["Timeline total weeks", "Requirement & Setup", "Workflow Automation"]
+          },
+          {
+            "name": "fte",
+            "terms": ["FTE", "Lead Gen AI Engineer", "Power BI"]
+          }
         ],
+        "selected_source_names_forbidden_any": ["TataSons", "Nippon"],
+        "max_foreign_source_count": 0,
         "min_confidence": "medium",
         "fallback_reason": null
       }
@@ -264,14 +296,18 @@
         "generated_query_terms_any": ["cost assumptions", "monthly estimate"],
         "generated_query_forbidden_terms_any": ["Tata Sons", "Nippon"],
         "min_rewrite_confidence": "medium",
-        "selected_document_ids_any": ["c0ff36ac-1876-4a5e-a4ca-a9fdbe220a99"],
-        "selected_pages_any": ["14", "15"],
-        "required_terms_all": [
-          "Average two pages per invoice",
-          "Total pages processed",
-          "Microsoft Fabric",
-          "Total $8,553.59"
+        "selected_text_term_groups_all": [
+          {
+            "name": "assumptions",
+            "terms": ["Average two pages per invoice", "Total pages processed", "supporting document pages"]
+          },
+          {
+            "name": "estimate",
+            "terms": ["Azure BOQ", "Microsoft Azure", "BOQ shared below"]
+          }
         ],
+        "selected_source_names_forbidden_any": ["TataSons", "Nippon"],
+        "max_foreign_source_count": 0,
         "min_confidence": "medium",
         "fallback_reason": null
       }
